@@ -1,0 +1,7 @@
+interface:
+  display_name: "TGTool"
+  short_description: "Choose and proactively use the best matching local skills"
+  default_prompt: "Use $tgtool to select the most suitable local skills for this request and immediately execute the task with them."
+
+policy:
+  allow_implicit_invocation: true

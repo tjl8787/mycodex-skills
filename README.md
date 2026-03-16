@@ -19,6 +19,8 @@ Then restart Codex so the new skills are picked up.
 
 - `api-gateway`: AWS API Gateway for REST and HTTP API management. Use when creating APIs, configuring integrations, setting up authorization, managing stages, implementing rate limiting, or troubleshooting API issues.
 - `bedrock`: AWS Bedrock foundation models for generative AI. Use when invoking foundation models, building AI applications, creating embeddings, configuring model access, or implementing RAG patterns.
+- `bucketmanager-s3control-e2e`: Local bucketmanager S3Control end-to-end testing workflow. Use when rebuilding `bkt-mgr`, preparing bitmap-based test data, running multi-s3gw parent/child job validation, or measuring memory peaks in this local environment.
+- `claude-mem-codex`: Use claude-mem from Codex via a Codex-specific wrapper, MCP registration, and `~/.codex`-backed data paths.
 - `cloudformation`: AWS CloudFormation infrastructure as code for stack management. Use when writing templates, deploying stacks, managing drift, troubleshooting deployments, or organizing infrastructure with nested stacks.
 - `cloudwatch`: AWS CloudWatch monitoring for logs, metrics, alarms, and dashboards. Use when setting up monitoring, creating alarms, querying logs with Insights, configuring metric filters, building dashboards, or troubleshooting application issues.
 - `cognito`: AWS Cognito user authentication and authorization service. Use when setting up user pools, configuring identity pools, implementing OAuth flows, managing user attributes, or integrating with social identity providers.
@@ -38,6 +40,7 @@ Then restart Codex so the new skills are picked up.
 - `sqs`: AWS SQS message queue service for decoupled architectures. Use when creating queues, configuring dead-letter queues, managing visibility timeouts, implementing FIFO ordering, or integrating with Lambda.
 - `step-functions`: AWS Step Functions workflow orchestration with state machines. Use when designing workflows, implementing error handling, configuring parallel execution, integrating with AWS services, or debugging executions.
 - `stream-coding`: Documentation-first development methodology focused on producing AI-ready specs before implementation. Use when you want to clarify requirements, produce executable specs, and reduce code-generation ambiguity.
+- `tgtool`: Routes tasks through the best local Codex skills, chooses execution mode, consults tool-advisor first, and now proactively considers persistent memory (`claude-mem`) and live web research (`exa`) when useful.
 - `tool-advisor`: Discovers the available tool environment and suggests suitable tool combinations for a task without executing actions.
 
 ## Notes

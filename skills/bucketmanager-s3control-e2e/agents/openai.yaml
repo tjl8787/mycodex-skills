@@ -1,0 +1,7 @@
+interface:
+  display_name: "Bucketmanager S3Control E2E"
+  short_description: "Rebuild local bucketmanager and run bitmap-based S3Control E2E tests"
+  default_prompt: "Use $bucketmanager-s3control-e2e to rebuild the local bucketmanager final image, restart bkt-mgr, and run the current bitmap-based S3Control end-to-end test flow."
+
+policy:
+  allow_implicit_invocation: true
