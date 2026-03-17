@@ -3,7 +3,7 @@ name: tgtool
 description: Use when the user wants the agent to choose, combine, and actively use the best available local skills for a task.
 metadata:
   author: codex
-  version: "2.5.0"
+  version: "2.6.0"
 ---
 
 # TGTool
@@ -26,7 +26,7 @@ The goal is not to use more skills. The goal is to use fewer, better.
 
 ## Mode selection
 
-Before substantial work, ask for mode unless the user already specified one.
+When the user explicitly invokes `tgtool`, ask for mode immediately unless the user already specified one in the same turn.
 
 Use:
 
@@ -59,6 +59,7 @@ After the user explicitly invokes `tgtool` once, keep `tgtool` active across sub
 Rules:
 
 - Treat the first explicit mention of `tgtool` as the start of a persistent routed session.
+- Once that explicit invocation happens, mode selection is mandatory before further routed work unless the mode was already provided in the same turn.
 - After that, continue applying `tgtool` even if the user does not explicitly mention it again.
 - End the persistent routed session only when the user explicitly says `tgend`.
 - If the user says `tgend`, stop applying `tgtool` by default from the next turn onward unless they explicitly invoke it again.
@@ -300,6 +301,8 @@ While the persistent `tgtool` session is active, end each user-facing reply with
 Use:
 
 `如需结束本轮 tgtool 调用，请回复 tgend。`
+
+Do not omit this line while the persistent `tgtool` session is active.
 
 Examples:
 
