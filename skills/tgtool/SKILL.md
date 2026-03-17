@@ -3,7 +3,7 @@ name: tgtool
 description: Use when the user wants the agent to choose, combine, and actively use the best available local skills for a task.
 metadata:
   author: codex
-  version: "2.2.0"
+  version: "2.3.0"
 ---
 
 # TGTool
@@ -173,6 +173,13 @@ Use `find-skills` only when at least one of these harder conditions is true:
 
 Do not use when the current installed skills already clearly cover the task.
 
+Prefer direct handling instead of `find-skills` when one or more of these are true:
+
+- the task is one-off, narrow, or tightly tied to the current project
+- the missing capability is small enough that existing tools or reasoning can cover it cleanly
+- installing a new skill would cost more time or context than solving the problem directly
+- the request is primarily execution, not capability extension
+
 ### Step 5: Execute with the minimum skill set
 
 After routing, open only the selected skill files and follow them.
@@ -268,6 +275,19 @@ Examples:
 - `Using $tool-advisor to confirm available capabilities, $stream-coding as the workflow skill, and $bucketmanager-s3control-e2e for local S3Control validation.`
 - `Using $tool-advisor first, then brainstorming because the request is still in the design phase.`
 - `Using $tool-advisor first, then $stream-coding, and adding find-skills because the current installed skills do not clearly cover the requested capability.`
+
+## Completion recap
+
+At the end of a routed task, prefer a very short recap when it adds value.
+
+Use this shape:
+
+- what skill path was used
+- whether the routing worked well or exposed a gap
+- whether memory should be updated
+- whether a missing capability suggests using `find-skills` next time
+
+Keep this recap compact. Use it only when it helps future execution or user understanding.
 
 ## Common routing patterns
 
