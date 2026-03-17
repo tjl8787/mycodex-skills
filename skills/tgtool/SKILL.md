@@ -3,7 +3,7 @@ name: tgtool
 description: Use when the user wants the agent to choose, combine, and actively use the best available local skills for a task.
 metadata:
   author: codex
-  version: "2.0.0"
+  version: "2.2.0"
 ---
 
 # TGTool
@@ -102,6 +102,16 @@ Only chain workflow skills when the task genuinely crosses phases, for example:
 - `writing-plans -> executing-plans`
 - `brainstorming -> stream-coding`
 
+Workflow fallback rules:
+
+- Once a task is routed into the `superpowers` workflow family, prefer to keep fallback and forward transitions inside that family.
+- If `executing-plans` is selected but the plan is missing, incomplete, or no longer trustworthy, fall back to `writing-plans`.
+- If `writing-plans` is selected but the requirements are still ambiguous, fall back to `brainstorming`.
+- If `brainstorming` has already converged, move forward to `writing-plans` for structured planning.
+- If `verification-before-completion` finds unresolved problems, fall back to `systematic-debugging` for failures and inconsistencies, or to `executing-plans` when the remaining work is implementation follow-through.
+- If `requesting-code-review` is selected but the work is not yet ready for review, fall back to `executing-plans` when a plan exists, or to `writing-plans` / `brainstorming` when the underlying issue is missing structure or unclear scope.
+- Use `$stream-coding` as a separate default execution workflow only when no `superpowers` workflow skill clearly fits, not as the default internal fallback once `superpowers` has been chosen.
+
 ### Step 4: Add supporting capabilities only when they matter
 
 These are optional support layers, not defaults.
@@ -116,6 +126,25 @@ Use when:
 - repeated context reconstruction would waste tokens
 
 Do not use for short, self-contained tasks where current-session context is already sufficient.
+
+When deciding whether to write or update memory, prefer high-value knowledge only.
+
+Treat information as high-value when one or more of these are true:
+
+- it is likely to recur across future sessions
+- it captures an environment constraint, workflow constraint, or tested operational fact
+- it is not obvious from reading the code alone
+- it has been verified by testing, execution, or direct inspection
+- preserving it will materially reduce future context rebuilding, repeated debugging, or repeated explanation
+
+Do not write low-value memory for:
+
+- one-off noise
+- unverified guesses
+- transient intermediate steps
+- facts that are trivial to recover from the repo
+
+When new verified information supersedes older memory, prefer updating the existing understanding instead of storing a conflicting duplicate.
 
 #### `exa`
 
@@ -134,6 +163,13 @@ Use when:
 - the user's request implies a capability gap in the currently installed skills
 - the user explicitly wants to discover whether a skill exists
 - a reusable skill likely exists and would materially improve the result
+
+Use `find-skills` only when at least one of these harder conditions is true:
+
+- there is no installed domain skill that directly matches the requested capability
+- the available skills cover workflow only, but not the missing capability itself
+- the requested capability looks reusable and general rather than one-off or project-specific
+- installing or discovering a skill is likely to improve quality more than handling the task ad hoc
 
 Do not use when the current installed skills already clearly cover the task.
 
@@ -154,10 +190,72 @@ When inputs are large, old, or repetitive:
 - avoid rereading large unchanged logs or documents
 - prefer “what changed?” over “repeat everything”
 
+Use this fixed compression flow:
+
+1. Decide whether full reading is actually required.
+2. If not, extract only:
+   - objective
+   - constraints
+   - current state
+   - deltas or failures
+3. Route using that compressed view first.
+4. Open original long content only for the specific sections needed by the selected skill.
+5. Preserve the compressed summary as the working context instead of repeatedly rebuilding it.
+
 If a task is long-running:
 
 - use `claude-mem` only if the added recall value is real
 - otherwise stay with current-session incremental context
+
+## Memory writeback policy
+
+At natural completion points, briefly evaluate whether memory should be written or updated.
+
+Use this rule:
+
+1. Ask whether the result has durable reuse value.
+2. If no, do not store it.
+3. If yes, prefer concise, validated conclusions over process noise.
+4. If the new result corrects or supersedes prior memory, update that understanding rather than duplicating it.
+5. Only write memory that would plausibly help a future session make better decisions faster.
+
+### Memory update rules
+
+When deciding between updating prior memory and writing a new memory:
+
+- Update existing memory when the new result is about the same workflow, environment fact, operational constraint, or previously recorded conclusion.
+- Write a new memory only when the result introduces a genuinely new reusable fact that is not simply a correction or refinement of an older one.
+- If old and new memories conflict, prefer the newer result only when it is more directly verified by execution, testing, or direct inspection.
+- If confidence is still mixed or the evidence is weak, do not overwrite high-confidence memory with speculation.
+- Prefer one clean updated understanding over multiple partially conflicting notes.
+
+Priority of trust:
+
+1. direct execution or test results
+2. direct inspection of current code, config, or runtime state
+3. previously stored memory
+4. inference or guesswork
+
+If the new result does not beat the old one on that scale, do not treat it as an authoritative update.
+
+## Routing explanation policy
+
+When reporting routing decisions, be concise but explain enough to audit the choice.
+
+Always include:
+
+- the selected skill or skill set
+- the main reason it was selected
+
+When there is an obvious alternative that was not chosen, briefly state why it was not chosen, for example:
+
+- current context was already sufficient
+- a more specific installed skill already covered the task
+- the task was implementation-heavy, not research-heavy
+- no real cross-session value justified `claude-mem`
+- no actual capability gap justified `find-skills`
+
+Do not enumerate every rejected skill. Mention only the most plausible skipped candidate when that explanation improves trust in the routing choice.
 
 ## Output behavior
 
