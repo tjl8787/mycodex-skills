@@ -29,20 +29,34 @@ Then restart Codex so the new skills are picked up.
 - `ecs`: AWS ECS container orchestration for running Docker containers. Use when deploying containerized applications, configuring task definitions, setting up services, managing clusters, or troubleshooting container issues.
 - `eks`: AWS EKS Kubernetes management for clusters, node groups, and workloads. Use when creating clusters, configuring IRSA, managing node groups, deploying applications, or integrating with AWS services.
 - `eventbridge`: AWS EventBridge serverless event bus for event-driven architectures. Use when creating rules, configuring event patterns, setting up scheduled events, integrating with SaaS, or building cross-account event routing.
+- `brainstorming`: Use before creative work or behavior changes to explore intent, requirements, and design before implementation.
+- `dispatching-parallel-agents`: Use when 2+ independent tasks can be worked on without shared state or strict sequencing.
 - `fuse`: Build, debug, and review Linux FUSE filesystems with the official libfuse userspace library. Use when implementing a FUSE filesystem, choosing between libfuse high-level vs low-level APIs, wiring callbacks, building with fuse3/pkg-config, mounting for local testing, or troubleshooting fusermount3 and permission issues.
+- `executing-plans`: Use when a written implementation plan already exists and needs disciplined execution.
+- `finishing-a-development-branch`: Use when implementation is done and you need to decide how to merge, PR, or clean up the branch.
 - `find-skills`: Discover and install new agent skills when the current installed skill set does not clearly cover a requested capability.
 - `iam`: AWS Identity and Access Management for users, roles, policies, and permissions. Use when creating IAM policies, configuring cross-account access, setting up service roles, troubleshooting permission errors, or managing access control.
 - `lambda`: AWS Lambda serverless functions for event-driven compute. Use when creating functions, configuring triggers, debugging invocations, optimizing cold starts, setting up event source mappings, or managing layers.
 - `openai-docs`: Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, especially for Codex, Responses API, Chat Completions, Apps SDK, Agents SDK, Realtime, and model capabilities or limits.
 - `rds`: AWS RDS relational database service for managed databases. Use when provisioning databases, configuring backups, managing replicas, troubleshooting connectivity, or optimizing performance.
+- `receiving-code-review`: Use when handling code review feedback and you need to verify suggestions rigorously before applying them.
+- `requesting-code-review`: Use when completing meaningful work and you want a review pass before merging or finalizing.
 - `s3`: AWS S3 object storage for bucket management, object operations, and access control. Use when creating buckets, uploading files, configuring lifecycle policies, setting up static websites, managing permissions, or implementing cross-region replication.
 - `secrets-manager`: AWS Secrets Manager for secure secret storage and rotation. Use when storing credentials, configuring automatic rotation, managing secret versions, retrieving secrets in applications, or integrating with RDS.
 - `sns`: AWS SNS notification service for pub/sub messaging. Use when creating topics, managing subscriptions, configuring message filtering, sending notifications, or setting up mobile push.
 - `sqs`: AWS SQS message queue service for decoupled architectures. Use when creating queues, configuring dead-letter queues, managing visibility timeouts, implementing FIFO ordering, or integrating with Lambda.
 - `step-functions`: AWS Step Functions workflow orchestration with state machines. Use when designing workflows, implementing error handling, configuring parallel execution, integrating with AWS services, or debugging executions.
 - `stream-coding`: Documentation-first development methodology focused on producing AI-ready specs before implementation. Use when you want to clarify requirements, produce executable specs, and reduce code-generation ambiguity.
+- `subagent-driven-development`: Use when executing implementation plans with independent tasks inside the current session.
+- `systematic-debugging`: Use when debugging bugs, failing tests, or unexpected behavior before proposing fixes.
+- `test-driven-development`: Use when implementing features or bugfixes before writing code.
 - `tgtool`: Routes tasks through the best local Codex skills, chooses execution mode, uses a layered routing flow, and now proactively considers persistent memory (`claude-mem`), live web research (`exa`), and skill discovery (`find-skills`) when useful.
 - `tool-advisor`: Discovers the available tool environment and suggests suitable tool combinations for a task without executing actions.
+- `using-git-worktrees`: Use when starting isolated feature work or before executing a plan that should not disturb the current workspace.
+- `using-superpowers`: Use at conversation start to establish how to discover and apply workflow skills.
+- `verification-before-completion`: Use before claiming work is complete to verify outputs and commands actually passed.
+- `writing-plans`: Use when a multi-step task needs a written implementation plan before code changes.
+- `writing-skills`: Use when creating, editing, or validating skills themselves.
 
 ## Notes
 
