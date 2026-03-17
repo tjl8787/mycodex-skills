@@ -3,7 +3,7 @@ name: tgtool
 description: Use when the user wants the agent to choose, combine, and actively use the best available local skills for a task.
 metadata:
   author: codex
-  version: "2.3.0"
+  version: "2.5.0"
 ---
 
 # TGTool
@@ -30,19 +30,39 @@ Before substantial work, ask for mode unless the user already specified one.
 
 Use:
 
-`Choose a tgtool mode: review, standard, or autopilot.`
+`Choose a tgtool mode: review (1/re), standard (2/st), or autopilot (3/auto).`
 
 ### Modes
 
 - `review`
   - Recommend routing and plan first.
   - Do not execute until the user confirms.
+  - In user-facing updates, explicitly state the current workflow stage and one short reason for the choice.
 - `standard`
   - Execute normally.
   - Ask when a meaningful branch, uncertainty, or risk appears.
+  - In user-facing updates, explicitly state the current workflow stage and one short reason for the choice.
 - `autopilot`
   - Execute end-to-end with minimal interruption.
   - Stop only for destructive actions, critical ambiguity, or required permission escalation.
+
+Accept these mode aliases:
+
+- `review`: `1`, `re`, `review`
+- `standard`: `2`, `st`, `standard`
+- `autopilot`: `3`, `auto`, `autopilot`
+
+## Session persistence
+
+After the user explicitly invokes `tgtool` once, keep `tgtool` active across subsequent turns by default.
+
+Rules:
+
+- Treat the first explicit mention of `tgtool` as the start of a persistent routed session.
+- After that, continue applying `tgtool` even if the user does not explicitly mention it again.
+- End the persistent routed session only when the user explicitly says `tgend`.
+- If the user says `tgend`, stop applying `tgtool` by default from the next turn onward unless they explicitly invoke it again.
+- The first activation still requires an explicit `tgtool` invocation.
 
 ## Global rules
 
@@ -269,6 +289,17 @@ Do not enumerate every rejected skill. Mention only the most plausible skipped c
 Before substantial work, first obtain the mode if needed.
 
 Then say which skills are being used and why in one concise line.
+
+In `review` and `standard` modes, also include:
+
+- the current workflow stage
+- one short reason for why this stage or routing choice is being used now
+
+While the persistent `tgtool` session is active, end each user-facing reply with one short line asking whether to end the current routed session.
+
+Use:
+
+`如需结束本轮 tgtool 调用，请回复 tgend。`
 
 Examples:
 
