@@ -30,6 +30,7 @@ Then restart Codex so the new skills are picked up.
 - `eks`: AWS EKS Kubernetes management for clusters, node groups, and workloads. Use when creating clusters, configuring IRSA, managing node groups, deploying applications, or integrating with AWS services.
 - `eventbridge`: AWS EventBridge serverless event bus for event-driven architectures. Use when creating rules, configuring event patterns, setting up scheduled events, integrating with SaaS, or building cross-account event routing.
 - `fuse`: Build, debug, and review Linux FUSE filesystems with the official libfuse userspace library. Use when implementing a FUSE filesystem, choosing between libfuse high-level vs low-level APIs, wiring callbacks, building with fuse3/pkg-config, mounting for local testing, or troubleshooting fusermount3 and permission issues.
+- `find-skills`: Discover and install new agent skills when the current installed skill set does not clearly cover a requested capability.
 - `iam`: AWS Identity and Access Management for users, roles, policies, and permissions. Use when creating IAM policies, configuring cross-account access, setting up service roles, troubleshooting permission errors, or managing access control.
 - `lambda`: AWS Lambda serverless functions for event-driven compute. Use when creating functions, configuring triggers, debugging invocations, optimizing cold starts, setting up event source mappings, or managing layers.
 - `openai-docs`: Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations, especially for Codex, Responses API, Chat Completions, Apps SDK, Agents SDK, Realtime, and model capabilities or limits.
@@ -40,7 +41,7 @@ Then restart Codex so the new skills are picked up.
 - `sqs`: AWS SQS message queue service for decoupled architectures. Use when creating queues, configuring dead-letter queues, managing visibility timeouts, implementing FIFO ordering, or integrating with Lambda.
 - `step-functions`: AWS Step Functions workflow orchestration with state machines. Use when designing workflows, implementing error handling, configuring parallel execution, integrating with AWS services, or debugging executions.
 - `stream-coding`: Documentation-first development methodology focused on producing AI-ready specs before implementation. Use when you want to clarify requirements, produce executable specs, and reduce code-generation ambiguity.
-- `tgtool`: Routes tasks through the best local Codex skills, chooses execution mode, consults tool-advisor first, and now proactively considers persistent memory (`claude-mem`) and live web research (`exa`) when useful.
+- `tgtool`: Routes tasks through the best local Codex skills, chooses execution mode, uses a layered routing flow, and now proactively considers persistent memory (`claude-mem`), live web research (`exa`), and skill discovery (`find-skills`) when useful.
 - `tool-advisor`: Discovers the available tool environment and suggests suitable tool combinations for a task without executing actions.
 
 ## Notes
