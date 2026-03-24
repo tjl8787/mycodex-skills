@@ -3,7 +3,7 @@ name: tgtool
 description: Use when the user wants the agent to choose, combine, and actively use the best available local skills for a task.
 metadata:
   author: codex
-  version: "2.6.0"
+  version: "2.7.0"
 ---
 
 # TGTool
@@ -59,7 +59,7 @@ After the user explicitly invokes `tgtool` once, keep `tgtool` active across sub
 Rules:
 
 - Treat the first explicit mention of `tgtool` as the start of a persistent routed session.
-- Once that explicit invocation happens, mode selection is mandatory before further routed work unless the mode was already provided in the same turn.
+- Once activated, mode selection is mandatory before further routed work unless the mode was already provided in the same turn.
 - After that, continue applying `tgtool` even if the user does not explicitly mention it again.
 - End the persistent routed session only when the user explicitly says `tgend`.
 - If the user says `tgend`, stop applying `tgtool` by default from the next turn onward unless they explicitly invoke it again.
@@ -78,6 +78,124 @@ Rules:
 9. Watch memory risk continuously. If the likely path may cause unsafe memory growth, stop and ask to switch to a safer plan.
 10. Watch storage risk continuously. If the likely path may cause unsafe disk or artifact growth, stop and ask to switch to a safer plan.
 
+
+## Proactive Boundaries
+
+Default posture: aggressively proactive for coding and debugging tasks.
+
+The router should move forward end-to-end whenever the path is technically obvious and low-risk. It should stop only when continued execution would create irreversible damage, introduce product-level ambiguity, affect shared environments without approval, or require elevated privileges.
+
+When in doubt between asking and progressing, prefer progressing if the action is local, reversible, and does not cross a shared-environment or business-semantics boundary.
+
+### Safe to do proactively
+
+The agent should proceed without asking for confirmation when the action is local, reversible, and part of the shortest path to completion.
+
+Examples:
+- read code, logs, configs, and git state
+- search the repository and trace call paths
+- make small or medium local code changes
+- run syntax checks, focused tests, and local verification
+- add minimal repros or minimal tests needed to validate a fix
+- retry with a safer equivalent local approach after a routine failure
+- narrow down faults through read-only inspection and evidence gathering
+- choose the smallest technically sound fix when the path is clear
+
+### Do proactively, but announce briefly first
+
+The agent should still proceed, but must tell the user what it is about to do in one short sentence before acting.
+
+Examples:
+- multi-file code changes
+- rebuilding or restarting local development containers
+- longer-running local verification
+- behavior-affecting bug fixes where the technical path is still clear
+- selecting one implementation approach among several close technical options when one is clearly the least risky
+
+Preferred pattern:
+- "I’m taking the smallest-impact path: first X, then I’ll verify Y."
+
+### Must stop and ask
+
+The agent must pause for confirmation when any of these are true:
+- destructive actions
+- irreversible or high-blast-radius actions
+- shared or remote environment changes
+- product or policy ambiguity
+- required privilege escalation
+- actions that add new infrastructure, dependencies, or platforms
+- actions that change long-term architecture beyond the current task
+- actions that may affect external users or live data semantics
+
+Examples:
+- deleting data, resetting state, wiping directories
+- `git reset --hard`, forced revert, or overwriting unrelated work
+- modifying remote/shared machines, containers, or configs without explicit approval
+- making a choice between valid business behaviors rather than technical fixes
+- introducing a new service, framework, or deployment dependency
+
+### Debugging-specific boundaries
+
+For debugging, default to read-only diagnosis first.
+
+The agent should:
+- inspect logs, config, status, and request flow first
+- build the smallest useful repro when needed
+- present conclusions in this order:
+  - symptom
+  - direct evidence
+  - likely root cause
+  - remaining uncertainty
+
+The agent must not:
+- assign blame without evidence
+- modify shared environments during diagnosis unless explicitly approved
+- restart services, clear jobs, or change configs on remote systems without approval
+
+### Coding-specific boundaries
+
+For coding tasks, default to the smallest closed loop:
+- identify the fault
+- patch the minimal relevant code
+- verify locally
+- report outcome
+
+The agent should proactively add:
+- boundary handling
+- compatibility fixes
+- focused logging
+- focused tests
+
+The agent should not proactively add:
+- broad refactors
+- framework migrations
+- architectural rewrites
+- unrelated cleanup
+
+### Decision order
+
+1. Determine whether a smallest safe path is obvious.
+2. If yes, proceed without asking.
+3. If the change is substantial but still safe, announce briefly and continue.
+4. Verify before claiming success.
+5. Stop only when a hard boundary above is triggered.
+
+## Working snapshot
+
+Before routing, compress the current task into a tiny working snapshot and keep reusing it.
+
+Include only:
+
+- objective
+- current repo or workspace
+- selected mode
+- selected primary workflow skill, if already chosen
+- selected support layers, if already chosen
+- confirmed constraints
+- unknowns blocking the next step
+
+Reuse this snapshot before re-reading files, skills, or prior context. Update it only when the facts change.
+
 ## Decision flow
 
 Apply this flow in order.
@@ -90,7 +208,54 @@ Do not over-route.
 - If the user explicitly names a skill, use it.
 - If the current session context is already enough and no extra capability is needed, keep routing minimal.
 
-### Step 2: Use `$tool-advisor` first by default
+### Step 2: Evidence gate
+
+Use the lowest evidence level that is safe.
+
+- `L0`
+  - the current conversation and snapshot are sufficient
+  - do not read extra skill files or environment files
+- `L1`
+  - read only the target skill file that you already expect to use
+- `L2`
+  - inspect environment, additional skills, memory, or external sources because there is real uncertainty
+
+Default to `L0` or `L1`. Escalate to `L2` only when it materially improves correctness.
+
+### Step 3: Fast-path precheck
+
+Before any capability scan, check whether the task can be routed immediately with current context.
+
+Use the fast path when one or more of these are true:
+
+- the user explicitly names a skill
+- the current session context already established the relevant capability set
+- the request is a small question, clarification, explanation, or other non-development task that does not depend on web research, installation, MCP discovery, or cross-repo exploration
+- the request is an extremely small local implementation task with one obvious fix, no meaningful ambiguity, and no meaningful behavior risk
+- the correct workflow path is already obvious from the current context
+
+Development-task override:
+
+- If the user is asking for code changes, behavior changes, refactors, or implementation work, do not treat it as a fast-path execution task by default.
+- For development work, prefer the `superpowers` workflow family by default.
+- Default development routing is: analyze first, then write a plan, then implement.
+- Use fast-path direct execution for development work only when the change is truly tiny, unambiguous, and low-risk.
+
+If the fast path is sufficient, skip `$tool-advisor` and proceed directly to workflow selection.
+
+### Step 4: Use `$tool-advisor` first by default
+
+Default preference:
+
+- treat this as the capability-confirmation path when uncertainty is real
+- do not treat it as a ritual
+- skip it when the path is already obvious
+
+Priority rule:
+
+- if `fast-path` and `$tool-advisor` default preference conflict, prefer `fast-path`
+- if environment uncertainty could change the routing decision, prefer `$tool-advisor`
+- if the current session already covers the key uncertainty, do not call `$tool-advisor` just for formality
 
 Use `$tool-advisor` unless the user explicitly forbids it or the path is already obvious.
 
@@ -102,20 +267,30 @@ Use it to answer:
 
 Do not use `$tool-advisor` as an excuse to reload everything. Use it to reduce uncertainty.
 
-### Step 3: Choose one primary workflow skill
+### Step 5: Choose one primary workflow skill
 
 Choose exactly one unless the task clearly moves across phases.
 
 Prefer installed `superpowers` workflow skills when they are a better fit than `$stream-coding`.
 
+Development-task default:
+
+- For implementation work, prefer the `superpowers` workflow family over direct execution.
+- The default development flow is:
+  - `brainstorming` for analysis
+  - `writing-plans` for a written plan
+  - `executing-plans` for disciplined implementation
+- Use `$stream-coding` directly only when no `superpowers` workflow skill fits better, or when the change is extremely small, unambiguous, and low-risk.
+- Do not route code-changing work straight into `$stream-coding` unless one of those narrow exceptions is true.
+
 - Use `brainstorming`
-  - For ambiguous requests, design exploration, tradeoff discussions, or requirement shaping
+  - For ambiguous requests, design exploration, tradeoff discussions, requirement shaping, or the analysis phase of development work
 - Use `writing-plans`
-  - When a multi-step implementation needs a written plan before execution
+  - When implementation should be preceded by an explicit written plan
 - Use `executing-plans`
   - When a plan already exists and the main need is disciplined execution
 - Use `$stream-coding`
-  - For direct implementation, structured engineering work, coding, testing, and repository changes
+  - For direct implementation once analysis and planning are already sufficient, or when the change is truly tiny and obvious
 
 Only chain workflow skills when the task genuinely crosses phases, for example:
 
@@ -133,7 +308,7 @@ Workflow fallback rules:
 - If `requesting-code-review` is selected but the work is not yet ready for review, fall back to `executing-plans` when a plan exists, or to `writing-plans` / `brainstorming` when the underlying issue is missing structure or unclear scope.
 - Use `$stream-coding` as a separate default execution workflow only when no `superpowers` workflow skill clearly fits, not as the default internal fallback once `superpowers` has been chosen.
 
-### Step 4: Add supporting capabilities only when they matter
+### Step 6: Add supporting capabilities only when they matter
 
 These are optional support layers, not defaults.
 
@@ -201,7 +376,7 @@ Prefer direct handling instead of `find-skills` when one or more of these are tr
 - installing a new skill would cost more time or context than solving the problem directly
 - the request is primarily execution, not capability extension
 
-### Step 5: Execute with the minimum skill set
+### Step 7: Execute with the minimum skill set
 
 After routing, open only the selected skill files and follow them.
 
@@ -268,14 +443,18 @@ If the new result does not beat the old one on that scale, do not treat it as an
 
 ## Routing explanation policy
 
-When reporting routing decisions, be concise but explain enough to audit the choice.
+When reporting routing decisions, be concise but auditable.
 
-Always include:
+Required:
 
 - the selected skill or skill set
 - the main reason it was selected
 
-When there is an obvious alternative that was not chosen, briefly state why it was not chosen, for example:
+Optional when helpful:
+
+- mention the most plausible skipped alternative and why it was skipped
+
+Examples:
 
 - current context was already sufficient
 - a more specific installed skill already covered the task
@@ -283,29 +462,27 @@ When there is an obvious alternative that was not chosen, briefly state why it w
 - no real cross-session value justified `claude-mem`
 - no actual capability gap justified `find-skills`
 
-Do not enumerate every rejected skill. Mention only the most plausible skipped candidate when that explanation improves trust in the routing choice.
+Do not enumerate every rejected skill. Mention only the most plausible skipped candidate when it improves trust in the routing choice.
 
 ## Output behavior
 
-Before substantial work, first obtain the mode if needed.
+Required:
 
-Then say which skills are being used and why in one concise line.
+- before substantial work, obtain the mode if needed
+- then say which skills are being used and why in one concise line
 
-In `review` and `standard` modes, also include:
+Also required in `review` and `standard`:
 
 - the current workflow stage
 - one short reason for why this stage or routing choice is being used now
 
-While the persistent `tgtool` session is active, end each user-facing reply with one short line asking whether to end the current routed session.
-
-Use:
+Required while the persistent `tgtool` session is active:
 
 `如需结束本轮 tgtool 调用，请回复 tgend。`
 
-Do not omit this line while the persistent `tgtool` session is active.
-
 Examples:
 
+- `Using fast-path routing with $stream-coding because the task is a small local code change and the path is already obvious.`
 - `Using $tool-advisor to confirm available capabilities, $stream-coding as the workflow skill, and $bucketmanager-s3control-e2e for local S3Control validation.`
 - `Using $tool-advisor first, then brainstorming because the request is still in the design phase.`
 - `Using $tool-advisor first, then $stream-coding, and adding find-skills because the current installed skills do not clearly cover the requested capability.`
@@ -321,26 +498,34 @@ Use this shape:
 - whether memory should be updated
 - whether a missing capability suggests using `find-skills` next time
 
-Keep this recap compact. Use it only when it helps future execution or user understanding.
+Keep it compact. Use it only when it helps future execution or user understanding.
 
 ## Common routing patterns
 
+These are defaults and examples, not mandatory routes.
+
+- Small obvious question or local non-development task:
+  - fast path + target workflow skill
+- Tiny low-risk code change:
+  - fast path or `tool-advisor` + `$stream-coding`
+- Default development task:
+  - `superpowers` workflow family first: `brainstorming` -> `writing-plans` -> `executing-plans`
+- Direct `$stream-coding` development exception:
+  - only for truly tiny, obvious, low-risk changes, or when no `superpowers` workflow skill fits better
+- Planned execution:
+  - fast path or `tool-advisor` + `executing-plans`
+- Cross-session recall:
+  - fast path or `tool-advisor` + `claude-mem`
 - Environment-aware execution:
   - `tool-advisor`
 - Ambiguous design work:
-  - `tool-advisor` + `brainstorming`
-- Planned execution:
-  - `tool-advisor` + `executing-plans`
-- Direct coding and testing:
-  - `tool-advisor` + `stream-coding`
-- Cross-session recall:
-  - `tool-advisor` + `claude-mem`
+  - fast path or `tool-advisor` + `brainstorming`
 - External research:
-  - `tool-advisor` + `exa`
+  - `tool-advisor` or direct trigger + `exa`
 - Skill discovery:
   - `tool-advisor` + `find-skills`
 - Local bucketmanager S3Control testing:
-  - `tool-advisor` + `stream-coding` + `bucketmanager-s3control-e2e`
+  - `brainstorming` -> `writing-plans` -> `$stream-coding` + `bucketmanager-s3control-e2e`, unless the change is truly tiny
 
 ## Scope
 
