@@ -3,7 +3,7 @@ name: tgtool
 description: Use when the user wants the agent to choose, combine, and actively use the best available local skills for a task.
 metadata:
   author: codex
-  version: "2.9.0"
+  version: "2.10.0"
 ---
 
 # TGTool
@@ -98,7 +98,8 @@ Rules while strict read-only mode is active:
 - allow only read-only inspection, reasoning, and reporting
 - do not edit files, restart services, rebuild containers, register/deregister services, delete data, push commits, or change any local/remote/shared environment state
 - do not perform verification steps that create side effects; prefer passive evidence from existing state
-- if an important command would change state, stop and ask first instead of inferring approval from prior momentum
+- before any substantive action, run an internal precheck: will this write files, change service/container/remote state, or create hard-to-revert side effects?
+- if the precheck says yes, stop and ask instead of inferring approval from prior momentum
 - state briefly that the task is being handled in strict read-only mode when doing substantive diagnosis
 
 Strict read-only mode stays active until the user explicitly relaxes it.
@@ -139,6 +140,15 @@ Examples:
 
 Preferred pattern:
 - "I’m taking the smallest-impact path: first X, then I’ll verify Y."
+
+### Shared-environment boundary
+
+When the next action touches a remote machine, shared container, shared config, shared data set, or other non-local environment, classify it before acting:
+- `只读可做`
+- `需确认后可做`
+- `禁止默认执行`
+
+When the classification affects the next step, state it in one short line instead of using a long warning template.
 
 ### Must stop and ask
 
@@ -190,7 +200,15 @@ Record only the minimum useful facts:
 - key output or observation
 - conclusion tied to that evidence
 
-Prefer updating one compact running record over scattering unsupported conclusions across many replies
+Prefer updating one compact running record over scattering unsupported conclusions across many replies.
+
+For long sessions, emit a compact evidence summary only when the topic shifts or the work is about to be summarized.
+
+Use at most four lines:
+- host or environment
+- key evidence
+- current conclusion
+- remaining unverified point
 
 ### Coding-specific boundaries
 
@@ -520,7 +538,9 @@ When the persistent `tgtool` session is active, keep session state visible witho
 
 Preferred behavior:
 - mention tgtool activation and mode at session start
+- mention a new mode only when the mode actually changes
 - use brief status reminders only when useful during long work
+- if the active mode materially changes execution strategy, say so once at the decision point
 - repeat `如需结束本轮 tgtool 调用，请回复 tgend。` only when the user may need the reminder, near closeout, or after a long gap
 
 Examples:
