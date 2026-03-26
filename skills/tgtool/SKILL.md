@@ -3,7 +3,7 @@ name: tgtool
 description: Use when the user wants the agent to choose, combine, and actively use the best available local skills for a task.
 metadata:
   author: codex
-  version: "2.7.0"
+  version: "2.9.0"
 ---
 
 # TGTool
@@ -65,6 +65,17 @@ Rules:
 - If the user says `tgend`, stop applying `tgtool` by default from the next turn onward unless they explicitly invoke it again.
 - The first activation still requires an explicit `tgtool` invocation.
 
+## Session visibility
+
+Keep tgtool visible without repeating the same boilerplate every turn.
+
+Rules:
+- announce tgtool activation and the selected mode when the session starts
+- if the mode changes, announce the new mode once
+- during longer work, prefer short status markers such as `仍在 tgtool/autopilot` instead of repeating the full termination sentence
+- remind the user about `tgend` only at session start, after a long gap, when the user seems uncertain whether tgtool is still active, or near task closeout
+- do not append the exact same termination sentence to every response by default
+
 ## Global rules
 
 1. Use Chinese by default unless the user explicitly requests another language.
@@ -77,6 +88,20 @@ Rules:
 8. Do not stop after recommending skills; execute with them unless the mode says not to.
 9. Watch memory risk continuously. If the likely path may cause unsafe memory growth, stop and ask to switch to a safer plan.
 10. Watch storage risk continuously. If the likely path may cause unsafe disk or artifact growth, stop and ask to switch to a safer plan.
+
+## Strict Read-Only Mode
+
+If the user explicitly says any equivalent of `readonly`, `只读`, `不要修改`, `不要动环境`, `绝对谨慎`, or otherwise makes a strong no-write request, enable strict read-only mode immediately.
+
+Rules while strict read-only mode is active:
+- treat the mode as stronger than review/standard/autopilot
+- allow only read-only inspection, reasoning, and reporting
+- do not edit files, restart services, rebuild containers, register/deregister services, delete data, push commits, or change any local/remote/shared environment state
+- do not perform verification steps that create side effects; prefer passive evidence from existing state
+- if an important command would change state, stop and ask first instead of inferring approval from prior momentum
+- state briefly that the task is being handled in strict read-only mode when doing substantive diagnosis
+
+Strict read-only mode stays active until the user explicitly relaxes it.
 
 
 ## Proactive Boundaries
@@ -141,16 +166,31 @@ For debugging, default to read-only diagnosis first.
 The agent should:
 - inspect logs, config, status, and request flow first
 - build the smallest useful repro when needed
+- separate debugging outputs into:
+  - 已验证
+  - 推断
+  - 未验证
 - present conclusions in this order:
   - symptom
   - direct evidence
   - likely root cause
   - remaining uncertainty
+- do not present inference as if it had already been verified
 
 The agent must not:
 - assign blame without evidence
 - modify shared environments during diagnosis unless explicitly approved
 - restart services, clear jobs, or change configs on remote systems without approval
+
+For remote debugging, keep a compact evidence ledger as the work proceeds.
+
+Record only the minimum useful facts:
+- host or environment
+- command or inspection method
+- key output or observation
+- conclusion tied to that evidence
+
+Prefer updating one compact running record over scattering unsupported conclusions across many replies
 
 ### Coding-specific boundaries
 
@@ -476,9 +516,12 @@ Also required in `review` and `standard`:
 - the current workflow stage
 - one short reason for why this stage or routing choice is being used now
 
-Required while the persistent `tgtool` session is active:
+When the persistent `tgtool` session is active, keep session state visible without fixed boilerplate.
 
-`如需结束本轮 tgtool 调用，请回复 tgend。`
+Preferred behavior:
+- mention tgtool activation and mode at session start
+- use brief status reminders only when useful during long work
+- repeat `如需结束本轮 tgtool 调用，请回复 tgend。` only when the user may need the reminder, near closeout, or after a long gap
 
 Examples:
 
