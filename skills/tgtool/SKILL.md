@@ -352,6 +352,7 @@ Scenario-specific route:
 - Use `multi-codex orchestration`
   - When the user explicitly wants multiple Codex agents or a virtual team, the task can be decomposed into 2+ relatively independent subproblems, sequential single-agent execution would be materially worse, and role-based ownership would improve throughput or confidence
   - Do not use it for tiny fixes, tightly coupled single-threaded work, pure read-only diagnosis without real parallel value, or tasks that would create conflicting write scopes across agents
+  - Prefer a `codex-native wrapper` as the initial backend; escalate to tmux-based orchestration only when the native wrapper is insufficient, and use heavier external frameworks only as a later backend option
   - If orchestration is unavailable or rejected, fall back in this order: `subagent-driven-development`, `dispatching-parallel-agents`, then ordinary `using-superpowers` routing
   - Reject orchestration when write ownership cannot be made disjoint enough for safe parallel execution
 
@@ -595,7 +596,7 @@ These are defaults and examples, not mandatory routes.
 - Cross-session recall:
   - fast path or `tool-advisor` + `claude-mem`
 - Multi-Codex orchestration:
-  - `using-superpowers` + orchestration adapter when the user explicitly wants multiple Codex agents and the task can be split into safe parallel roles
+  - `using-superpowers` + orchestration adapter when the user explicitly wants multiple Codex agents and the task can be split into safe parallel roles; prefer a `codex-native wrapper` backend first
 - Complex multi-step task with persistent working state:
   - `using-superpowers` + `planning-with-files` when disk-backed planning, findings, and progress tracking would materially help
 - Environment-aware execution:
