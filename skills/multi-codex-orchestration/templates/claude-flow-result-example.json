@@ -1,0 +1,13 @@
+{
+  "orchestration_session_id": "orch-20260327-001",
+  "roles_spawned": ["planner", "implementer", "verifier", "reviewer"],
+  "status": "complete",
+  "role_statuses": [
+    {"role": "planner", "status": "complete", "summary": "task split accepted"},
+    {"role": "implementer", "status": "complete", "summary": "patch ready"},
+    {"role": "verifier", "status": "complete", "summary": "focused validation passed"},
+    {"role": "reviewer", "status": "complete", "summary": "no blocking review findings"}
+  ],
+  "summary": "external backend completed successfully",
+  "artifacts": ["src/feature_x.py", "tests/test_feature_x.py"]
+}

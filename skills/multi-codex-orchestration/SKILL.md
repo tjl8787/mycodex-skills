@@ -17,6 +17,11 @@ Default backend:
 Phase 2 backend:
 - `claude-flow` adapter when richer external orchestration is actually needed
 
+Phase 2 helper assets included in this skill:
+- `scripts/build_claude_flow_payload.py` to map a normalized session into a `claude-flow` backend payload
+- `scripts/normalize_claude_flow_result.py` to map backend output back into the stable adapter result shape
+- `templates/claude-flow-result-example.json` as a sample backend result for normalization
+
 ## When to Use
 
 Use when all of these are true:
@@ -62,13 +67,18 @@ Use the local backend first because it preserves current skills, current boundar
 
 ## Supporting References
 
-For Phase 1 implementation details, also see:
+For Phase 1 and Phase 2 implementation details, also see:
 - `docs/codex-native-wrapper-spec.md`
 - `docs/codex-native-wrapper-session-schema.md`
 - `docs/codex-native-wrapper-playbook.md`
+- `docs/claude-flow-adapter-spec.md`
+- `docs/claude-flow-adapter-playbook.md`
 - `scripts/bootstrap_session.py`
 - `scripts/render_role_brief.py`
+- `scripts/build_claude_flow_payload.py`
+- `scripts/normalize_claude_flow_result.py`
 - `templates/session-example.json`
+- `templates/claude-flow-result-example.json`
 
 ## Process
 
@@ -147,5 +157,5 @@ If orchestration should not continue, fall back in this order:
 
 - `tgtool` stays the entrypoint
 - Phase 1 uses the local `codex-native wrapper`
-- Phase 2 may introduce `claude-flow`, but only behind the adapter
+- Phase 2 introduces `claude-flow`, but only behind the adapter
 - prefer fewer roles over unsafe parallelism
