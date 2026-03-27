@@ -3,7 +3,7 @@ name: tgtool
 description: Use when the user wants the agent to choose, combine, and actively use the best available local skills for a task.
 metadata:
   author: codex
-  version: "2.14.0"
+  version: "2.15.0"
 ---
 
 # TGTool
@@ -353,6 +353,7 @@ Scenario-specific route:
   - When the user explicitly wants multiple Codex agents or a virtual team, the task can be decomposed into 2+ relatively independent subproblems, sequential single-agent execution would be materially worse, and role-based ownership would improve throughput or confidence
   - Do not use it for tiny fixes, tightly coupled single-threaded work, pure read-only diagnosis without real parallel value, or tasks that would create conflicting write scopes across agents
   - Prefer a `codex-native wrapper` as the Phase 1 backend; introduce a `claude-flow` adapter in Phase 2 only when richer external orchestration is actually needed
+  - If the user explicitly asks for a `ruflo` backend or asks to initialize the orchestration runtime, use `skills/multi-codex-orchestration/scripts/ensure_ruflo_init.py` to detect the current state and then execute `ruflo init --codex` or `ruflo init --minimal --force` as needed
   - If orchestration is unavailable or rejected, fall back in this order: `subagent-driven-development`, `dispatching-parallel-agents`, then ordinary `using-superpowers` routing
   - Reject orchestration when write ownership cannot be made disjoint enough for safe parallel execution
 
@@ -596,7 +597,7 @@ These are defaults and examples, not mandatory routes.
 - Cross-session recall:
   - fast path or `tool-advisor` + `claude-mem`
 - Multi-Codex orchestration:
-  - `using-superpowers` + `multi-codex-orchestration` when the user explicitly wants multiple Codex agents and the task can be split into safe parallel roles; Phase 1 uses the `codex-native wrapper` backend
+  - `using-superpowers` + `multi-codex-orchestration` when the user explicitly wants multiple Codex agents and the task can be split into safe parallel roles; Phase 1 uses the `codex-native wrapper` backend, and explicit `ruflo` backend requests may first run `ensure_ruflo_init.py` before orchestration continues
 - Complex multi-step task with persistent working state:
   - `using-superpowers` + `planning-with-files` when disk-backed planning, findings, and progress tracking would materially help
 - Environment-aware execution:

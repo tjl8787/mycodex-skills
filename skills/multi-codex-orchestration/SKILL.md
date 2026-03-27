@@ -51,6 +51,7 @@ Do not use when any of these are true:
 Helper assets included in this skill:
 - `scripts/bootstrap_session.py` to create a wrapper session file
 - `scripts/render_role_brief.py` to render a role-specific brief
+- `scripts/ensure_ruflo_init.py` to detect or initialize `ruflo` Codex/runtime state
 - `templates/session-example.json` as a starter payload
 
 
@@ -73,8 +74,10 @@ For Phase 1 and Phase 2 implementation details, also see:
 - `docs/codex-native-wrapper-playbook.md`
 - `docs/claude-flow-adapter-spec.md`
 - `docs/claude-flow-adapter-playbook.md`
+- `docs/ruflo-init-playbook.md`
 - `scripts/bootstrap_session.py`
 - `scripts/render_role_brief.py`
+- `scripts/ensure_ruflo_init.py`
 - `scripts/build_claude_flow_payload.py`
 - `scripts/normalize_claude_flow_result.py`
 - `templates/session-example.json`
@@ -112,7 +115,15 @@ For each role, state:
 
 Reject orchestration if ownership cannot be made clear enough.
 
-### 4. Execute through the codex-native wrapper
+### 4. Ensure the selected backend is initialized
+
+When the user explicitly wants a `ruflo` backend or asks to initialize orchestration runtime state:
+- run `scripts/ensure_ruflo_init.py --target auto` first to detect the current state
+- if Codex integration is missing, initialize with `ruflo init --codex`
+- if runtime state is missing, initialize with `ruflo init --minimal --force`
+- if both are already present, do not reinitialize unless the user explicitly asks
+
+### 5. Execute through the codex-native wrapper
 
 Normalize the task into:
 - task summary
@@ -124,7 +135,7 @@ Normalize the task into:
 
 Then run the roles through the Codex tool mapping.
 
-### 5. Normalize results
+### 6. Normalize results
 
 Collect per-role outputs into a stable result shape:
 - orchestration session id
@@ -157,5 +168,6 @@ If orchestration should not continue, fall back in this order:
 
 - `tgtool` stays the entrypoint
 - Phase 1 uses the local `codex-native wrapper`
+- explicit `ruflo` backend requests may first initialize `codex` or `runtime` state through `scripts/ensure_ruflo_init.py`
 - Phase 2 introduces `claude-flow`, but only behind the adapter
 - prefer fewer roles over unsafe parallelism
