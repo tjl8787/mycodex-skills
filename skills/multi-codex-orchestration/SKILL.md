@@ -14,6 +14,9 @@ This skill does not replace `tgtool`. It provides the Phase 1 orchestration meth
 Default backend:
 - `codex-native wrapper`
 
+Visible backend:
+- `tmux-visible` when the user explicitly wants multiple foreground panes or windows
+
 Phase 2 backend:
 - `claude-flow` adapter when richer external orchestration is actually needed
 
@@ -53,6 +56,9 @@ Helper assets included in this skill:
 - `scripts/render_role_brief.py` to render a role-specific brief
 - `scripts/ensure_ruflo_init.py` to detect or initialize `ruflo` Codex/runtime state
 - `scripts/bootstrap_ruflo_backend.py` to automatically chain init and swarm bootstrap for `ruflo`
+- `scripts/bootstrap_tmux_visible_backend.py` to open a visible tmux session with role panes
+- `scripts/dispatch_tmux_role.py` to stream main-session stage instructions into visible role panes
+- `scripts/broadcast_tmux_stage.py` to broadcast stage changes to all visible tmux role panes at once
 - `templates/session-example.json` as a starter payload
 
 
@@ -77,10 +83,14 @@ For Phase 1 and Phase 2 implementation details, also see:
 - `docs/claude-flow-adapter-playbook.md`
 - `docs/ruflo-init-playbook.md`
 - `docs/ruflo-runtime-bootstrap-playbook.md`
+- `docs/tmux-visible-backend-playbook.md`
 - `scripts/bootstrap_session.py`
 - `scripts/render_role_brief.py`
 - `scripts/ensure_ruflo_init.py`
 - `scripts/bootstrap_ruflo_backend.py`
+- `scripts/bootstrap_tmux_visible_backend.py`
+- `scripts/dispatch_tmux_role.py`
+- `scripts/broadcast_tmux_stage.py`
 - `scripts/build_claude_flow_payload.py`
 - `scripts/normalize_claude_flow_result.py`
 - `templates/session-example.json`
@@ -127,6 +137,17 @@ When the user explicitly wants a `ruflo` backend or asks to initialize orchestra
 - let it initialize a swarm through `ruflo swarm init --v3-mode`
 - keep daemon startup optional instead of making it part of the default chain
 
+When the user explicitly wants visible foreground workers, tmux panes, or front windows:
+- run `scripts/bootstrap_tmux_visible_backend.py`
+- create a named tmux session with one pane per role
+- enable `tmux set-option -g mouse on`
+- enable `tmux set-option -s set-clipboard on`
+- keep the pane set conservative by default: `planner`, `implementer`, `verifier`, `reviewer`
+- treat this backend as visibility-first, not as the default orchestration path
+- keep a session state file so the main session can address roles deterministically
+- use `scripts/dispatch_tmux_role.py` at each major stage so the user can watch role-specific work appear in the panes in real time
+- use `scripts/broadcast_tmux_stage.py` when the main session changes stage and all visible panes should refresh together
+
 ### 5. Execute through the codex-native wrapper
 
 Normalize the task into:
@@ -172,6 +193,7 @@ If orchestration should not continue, fall back in this order:
 
 - `tgtool` stays the entrypoint
 - Phase 1 uses the local `codex-native wrapper`
+- visible terminal workers use the `tmux-visible` backend only when the user explicitly asks for foreground panes or windows
 - explicit `ruflo` backend requests may first run `scripts/bootstrap_ruflo_backend.py` to initialize Codex/runtime state and a swarm automatically
 - Phase 2 introduces `claude-flow`, but only behind the adapter
 - prefer fewer roles over unsafe parallelism
