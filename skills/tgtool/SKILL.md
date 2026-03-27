@@ -3,7 +3,7 @@ name: tgtool
 description: Use when the user wants the agent to choose, combine, and actively use the best available local skills for a task.
 metadata:
   author: codex
-  version: "2.11.0"
+  version: "2.12.0"
 ---
 
 # TGTool
@@ -385,6 +385,27 @@ Do not write low-value memory for:
 
 When new verified information supersedes older memory, prefer updating the existing understanding instead of storing a conflicting duplicate.
 
+#### `planning-with-files`
+
+Use when:
+
+- the task is complex, multi-step, or likely to require more than 5 tool calls
+- the work will span multiple phases, discoveries, or verification loops
+- persistent file-backed planning would reduce context loss or help recovery after interruptions
+- the task benefits from maintaining `task_plan.md`, `findings.md`, and `progress.md` in the project root
+
+Do not use when:
+
+- the task is short, obvious, and easily held in normal session context
+- the overhead of planning files would exceed the value of the task itself
+
+Use it as a support layer, not a replacement workflow:
+
+- let `superpowers` own the development flow when `superpowers` is selected
+- add `planning-with-files` only when disk-backed plan, findings, and progress tracking would materially improve execution or recovery
+- do not make `planning-with-files` the default primary workflow for ordinary coding tasks
+
+
 #### `exa`
 
 Use when:
@@ -564,6 +585,8 @@ These are defaults and examples, not mandatory routes.
   - fast path or `tool-advisor` + `using-superpowers`, unless a specific superpowers entry skill was explicitly requested
 - Cross-session recall:
   - fast path or `tool-advisor` + `claude-mem`
+- Complex multi-step task with persistent working state:
+  - `using-superpowers` + `planning-with-files` when disk-backed planning, findings, and progress tracking would materially help
 - Environment-aware execution:
   - `tool-advisor`
 - Ambiguous design work:
