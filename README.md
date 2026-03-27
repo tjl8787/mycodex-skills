@@ -50,7 +50,7 @@ Then restart Codex so the new skills are picked up.
 - `subagent-driven-development`: Use when executing implementation plans with independent tasks inside the current session.
 - `systematic-debugging`: Use when debugging bugs, failing tests, or unexpected behavior before proposing fixes.
 - `test-driven-development`: Use when implementing features or bugfixes before writing code.
-- `tgtool`: Routes tasks through the best local Codex skills, chooses execution mode, adds strict read-only handling for no-write requests, separates debugging outputs into verified/inferred/unverified sections, keeps a compact remote evidence ledger, and reduces repeated session boilerplate while still tracking mode and `tgend` state.
+- `tgtool`: Routes tasks through the best local Codex skills, chooses execution mode, adds strict read-only handling for no-write requests, separates debugging outputs into verified/inferred/unverified sections, keeps a compact remote evidence ledger, reduces repeated session boilerplate while still tracking mode and `tgend` state, and lets `superpowers` own its internal development workflow once selected.
 - `tool-advisor`: Discovers the available tool environment and suggests suitable tool combinations for a task without executing actions.
 - `using-git-worktrees`: Use when starting isolated feature work or before executing a plan that should not disturb the current workspace.
 - `using-superpowers`: Use at conversation start to establish how to discover and apply workflow skills.

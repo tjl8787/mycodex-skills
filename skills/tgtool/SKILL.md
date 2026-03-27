@@ -3,7 +3,7 @@ name: tgtool
 description: Use when the user wants the agent to choose, combine, and actively use the best available local skills for a task.
 metadata:
   author: codex
-  version: "2.10.0"
+  version: "2.11.0"
 ---
 
 # TGTool
@@ -334,36 +334,21 @@ Prefer installed `superpowers` workflow skills when they are a better fit than `
 Development-task default:
 
 - For implementation work, prefer the `superpowers` workflow family over direct execution.
-- The default development flow is:
-  - `brainstorming` for analysis
-  - `writing-plans` for a written plan
-  - `executing-plans` for disciplined implementation
+- When tgtool routes a task into `superpowers`, let `superpowers` choose and control its own internal development process.
+- Do not hard-code a fixed internal sequence such as `brainstorming -> writing-plans -> executing-plans` inside tgtool.
+- Keep tgtool responsible for global rules, mode behavior, visibility, boundaries, and support-skill selection while `superpowers` owns the development workflow once selected.
 - Use `$stream-coding` directly only when no `superpowers` workflow skill fits better, or when the change is extremely small, unambiguous, and low-risk.
 - Do not route code-changing work straight into `$stream-coding` unless one of those narrow exceptions is true.
 
-- Use `brainstorming`
-  - For ambiguous requests, design exploration, tradeoff discussions, requirement shaping, or the analysis phase of development work
-- Use `writing-plans`
-  - When implementation should be preceded by an explicit written plan
-- Use `executing-plans`
-  - When a plan already exists and the main need is disciplined execution
+- Use `using-superpowers`
+  - When the task should enter the `superpowers` workflow family and its internal workflow should be delegated to `superpowers` instead of being prescribed by tgtool
+- Use `brainstorming`, `writing-plans`, or `executing-plans` directly only when the user explicitly asks for one of them, or when another active instruction already makes that specific entry point mandatory.
 - Use `$stream-coding`
   - For direct implementation once analysis and planning are already sufficient, or when the change is truly tiny and obvious
 
-Only chain workflow skills when the task genuinely crosses phases, for example:
+Workflow boundary rule:
 
-- `brainstorming -> writing-plans`
-- `writing-plans -> executing-plans`
-- `brainstorming -> stream-coding`
-
-Workflow fallback rules:
-
-- Once a task is routed into the `superpowers` workflow family, prefer to keep fallback and forward transitions inside that family.
-- If `executing-plans` is selected but the plan is missing, incomplete, or no longer trustworthy, fall back to `writing-plans`.
-- If `writing-plans` is selected but the requirements are still ambiguous, fall back to `brainstorming`.
-- If `brainstorming` has already converged, move forward to `writing-plans` for structured planning.
-- If `verification-before-completion` finds unresolved problems, fall back to `systematic-debugging` for failures and inconsistencies, or to `executing-plans` when the remaining work is implementation follow-through.
-- If `requesting-code-review` is selected but the work is not yet ready for review, fall back to `executing-plans` when a plan exists, or to `writing-plans` / `brainstorming` when the underlying issue is missing structure or unclear scope.
+- Once a task is routed into the `superpowers` workflow family, do not prescribe its internal fallback or forward transitions from tgtool; let `superpowers` manage that flow.
 - Use `$stream-coding` as a separate default execution workflow only when no `superpowers` workflow skill clearly fits, not as the default internal fallback once `superpowers` has been chosen.
 
 ### Step 6: Add supporting capabilities only when they matter
@@ -572,23 +557,23 @@ These are defaults and examples, not mandatory routes.
 - Tiny low-risk code change:
   - fast path or `tool-advisor` + `$stream-coding`
 - Default development task:
-  - `superpowers` workflow family first: `brainstorming` -> `writing-plans` -> `executing-plans`
+  - `superpowers` workflow family first, with internal development flow delegated to `using-superpowers` instead of hard-coded here
 - Direct `$stream-coding` development exception:
   - only for truly tiny, obvious, low-risk changes, or when no `superpowers` workflow skill fits better
 - Planned execution:
-  - fast path or `tool-advisor` + `executing-plans`
+  - fast path or `tool-advisor` + `using-superpowers`, unless a specific superpowers entry skill was explicitly requested
 - Cross-session recall:
   - fast path or `tool-advisor` + `claude-mem`
 - Environment-aware execution:
   - `tool-advisor`
 - Ambiguous design work:
-  - fast path or `tool-advisor` + `brainstorming`
+  - fast path or `tool-advisor` + `using-superpowers`, unless a specific design skill was explicitly requested
 - External research:
   - `tool-advisor` or direct trigger + `exa`
 - Skill discovery:
   - `tool-advisor` + `find-skills`
 - Local bucketmanager S3Control testing:
-  - `brainstorming` -> `writing-plans` -> `$stream-coding` + `bucketmanager-s3control-e2e`, unless the change is truly tiny
+  - `superpowers` workflow family + `bucketmanager-s3control-e2e`, unless the change is truly tiny or another explicit skill choice overrides it
 
 ## Scope
 
