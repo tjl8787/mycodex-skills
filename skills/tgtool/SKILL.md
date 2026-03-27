@@ -596,7 +596,7 @@ These are defaults and examples, not mandatory routes.
 - Cross-session recall:
   - fast path or `tool-advisor` + `claude-mem`
 - Multi-Codex orchestration:
-  - `using-superpowers` + orchestration adapter when the user explicitly wants multiple Codex agents and the task can be split into safe parallel roles; prefer a `codex-native wrapper` backend first
+  - `using-superpowers` + orchestration adapter when the user explicitly wants multiple Codex agents and the task can be split into safe parallel roles; prefer a `codex-native wrapper` backend first, mapped onto existing Codex agent tools
 - Complex multi-step task with persistent working state:
   - `using-superpowers` + `planning-with-files` when disk-backed planning, findings, and progress tracking would materially help
 - Environment-aware execution:
