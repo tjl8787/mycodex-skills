@@ -54,6 +54,13 @@ Map orchestration actions to existing Codex tools:
 
 Use the local backend first because it preserves current skills, current boundaries, and current Codex behavior.
 
+## Supporting References
+
+For Phase 1 implementation details, also see:
+- `docs/codex-native-wrapper-spec.md`
+- `docs/codex-native-wrapper-session-schema.md`
+- `docs/codex-native-wrapper-playbook.md`
+
 ## Process
 
 ### 1. Confirm orchestration eligibility
