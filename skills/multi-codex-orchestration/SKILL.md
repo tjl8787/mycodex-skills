@@ -52,6 +52,7 @@ Helper assets included in this skill:
 - `scripts/bootstrap_session.py` to create a wrapper session file
 - `scripts/render_role_brief.py` to render a role-specific brief
 - `scripts/ensure_ruflo_init.py` to detect or initialize `ruflo` Codex/runtime state
+- `scripts/bootstrap_ruflo_backend.py` to automatically chain init and swarm bootstrap for `ruflo`
 - `templates/session-example.json` as a starter payload
 
 
@@ -75,9 +76,11 @@ For Phase 1 and Phase 2 implementation details, also see:
 - `docs/claude-flow-adapter-spec.md`
 - `docs/claude-flow-adapter-playbook.md`
 - `docs/ruflo-init-playbook.md`
+- `docs/ruflo-runtime-bootstrap-playbook.md`
 - `scripts/bootstrap_session.py`
 - `scripts/render_role_brief.py`
 - `scripts/ensure_ruflo_init.py`
+- `scripts/bootstrap_ruflo_backend.py`
 - `scripts/build_claude_flow_payload.py`
 - `scripts/normalize_claude_flow_result.py`
 - `templates/session-example.json`
@@ -115,13 +118,14 @@ For each role, state:
 
 Reject orchestration if ownership cannot be made clear enough.
 
-### 4. Ensure the selected backend is initialized
+### 4. Bootstrap the selected backend automatically
 
 When the user explicitly wants a `ruflo` backend or asks to initialize orchestration runtime state:
-- run `scripts/ensure_ruflo_init.py --target auto` first to detect the current state
-- if Codex integration is missing, initialize with `ruflo init --codex`
-- if runtime state is missing, initialize with `ruflo init --minimal --force`
-- if both are already present, do not reinitialize unless the user explicitly asks
+- run `scripts/bootstrap_ruflo_backend.py` first
+- let it ensure Codex integration if missing
+- let it ensure runtime state if missing
+- let it initialize a swarm through `ruflo swarm init --v3-mode`
+- keep daemon startup optional instead of making it part of the default chain
 
 ### 5. Execute through the codex-native wrapper
 
@@ -168,6 +172,6 @@ If orchestration should not continue, fall back in this order:
 
 - `tgtool` stays the entrypoint
 - Phase 1 uses the local `codex-native wrapper`
-- explicit `ruflo` backend requests may first initialize `codex` or `runtime` state through `scripts/ensure_ruflo_init.py`
+- explicit `ruflo` backend requests may first run `scripts/bootstrap_ruflo_backend.py` to initialize Codex/runtime state and a swarm automatically
 - Phase 2 introduces `claude-flow`, but only behind the adapter
 - prefer fewer roles over unsafe parallelism
