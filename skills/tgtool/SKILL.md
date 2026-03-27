@@ -352,6 +352,8 @@ Scenario-specific route:
 - Use `multi-codex orchestration`
   - When the user explicitly wants multiple Codex agents or a virtual team, the task can be decomposed into 2+ relatively independent subproblems, sequential single-agent execution would be materially worse, and role-based ownership would improve throughput or confidence
   - Do not use it for tiny fixes, tightly coupled single-threaded work, pure read-only diagnosis without real parallel value, or tasks that would create conflicting write scopes across agents
+  - If orchestration is unavailable or rejected, fall back in this order: `subagent-driven-development`, `dispatching-parallel-agents`, then ordinary `using-superpowers` routing
+  - Reject orchestration when write ownership cannot be made disjoint enough for safe parallel execution
 
 Workflow boundary rule:
 
