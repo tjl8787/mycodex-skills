@@ -143,6 +143,8 @@ When the user explicitly wants visible foreground workers, tmux panes, or front 
 - enable `tmux set-option -g mouse on`
 - enable `tmux set-option -s set-clipboard on`
 - keep the pane set conservative by default: `planner`, `implementer`, `verifier`, `reviewer`
+- prefer `shell` pane mode by default so visible workers can execute real commands and one-shot `codex 'prompt'` runs deterministically
+- use `codex` pane mode only when the user explicitly wants long-lived interactive Codex panes instead of controllable shell panes
 - treat this backend as visibility-first, not as the default orchestration path
 - keep a session state file so the main session can address roles deterministically
 - use `scripts/dispatch_tmux_role.py` at each major stage so the user can watch role-specific work appear in the panes in real time

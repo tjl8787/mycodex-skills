@@ -100,6 +100,7 @@ def build_layout(
     task_summary: str | None,
     requested_outcome: str | None,
     launch_codex: bool,
+    pane_mode: str,
 ) -> dict[str, str]:
     # session starts with pane 0
     while True:
@@ -118,7 +119,7 @@ def build_layout(
         role_map[role] = target
         banner = f'printf "\\n=== {role.upper()} ===\\nworkspace: %s\\n\\n" "{project_dir}"'
         run(["tmux", "send-keys", "-t", target, banner, "C-m"])
-        run(["tmux", "select-pane", "-t", target, "-T", role])
+        run(["tmux", "select-pane", "-t", target, "-T", f"{role} ({pane_mode})"])
         if launch_codex:
             launch_codex_worker(
                 session_name,
@@ -142,6 +143,7 @@ def write_state(
     role_map: dict[str, str],
     attach_command: str,
     launch_codex: bool,
+    pane_mode: str,
 ) -> Path:
     path = state_file_path(project_dir, session_name)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -153,6 +155,7 @@ def write_state(
         "role_targets": role_map,
         "attach_command": attach_command,
         "launch_codex": launch_codex,
+        "pane_mode": pane_mode,
     }
     path.write_text(json.dumps(state, ensure_ascii=True, indent=2) + "\n", encoding="utf-8")
     return path
@@ -167,6 +170,12 @@ def main() -> None:
     parser.add_argument("--project-dir", default=str(Path.cwd()))
     parser.add_argument("--task-summary")
     parser.add_argument("--requested-outcome")
+    parser.add_argument(
+        "--pane-mode",
+        choices=["shell", "codex"],
+        default="shell",
+        help="shell keeps panes controllable for real command execution; codex starts interactive Codex workers.",
+    )
     parser.add_argument("--no-launch-codex", action="store_true")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
@@ -199,7 +208,8 @@ def main() -> None:
         project_dir,
         args.task_summary,
         args.requested_outcome,
-        not args.no_launch_codex,
+        args.pane_mode == "codex" and not args.no_launch_codex,
+        args.pane_mode,
     )
     attach_command = f"tmux attach -t {args.session_name}"
     state_path = write_state(
@@ -208,7 +218,8 @@ def main() -> None:
         args.roles,
         role_map,
         attach_command,
-        not args.no_launch_codex,
+        args.pane_mode == "codex" and not args.no_launch_codex,
+        args.pane_mode,
     )
 
     result = {
@@ -217,7 +228,8 @@ def main() -> None:
         "session_name": args.session_name,
         "roles": args.roles,
         "created": created,
-        "launch_codex": not args.no_launch_codex,
+        "launch_codex": args.pane_mode == "codex" and not args.no_launch_codex,
+        "pane_mode": args.pane_mode,
         "attach_command": attach_command,
         "state_file": str(state_path),
     }

@@ -32,12 +32,14 @@ Use `skills/multi-codex-orchestration/scripts/bootstrap_tmux_visible_backend.py`
 - create or reuse a named tmux session
 - split panes into the default role layout
 - label each pane with a role banner
-- start `codex` inside each pane by default
-- pass a role-specific startup prompt into each visible worker
+- prefer `shell` pane mode by default so each visible pane stays controllable and can execute real shell commands or one-shot `codex 'prompt'` runs
+- use `codex` pane mode only when the user explicitly wants long-lived interactive Codex panes
 - write a session state file with stable role-to-pane targets
 - print the attach command
 
-Use `--no-launch-codex` only when the user wants visible empty panes without immediately starting workers.
+Use `scripts/execute_tmux_role_command.py` when a role pane should visibly run a real shell command.
+
+Use `scripts/run_tmux_role_codex.py` when a role pane should visibly run a one-shot Codex task through the shell.
 
 Use `skills/multi-codex-orchestration/scripts/dispatch_tmux_role.py` whenever the main session changes stage or hands work to a role:
 - planner gets planning-stage guidance
