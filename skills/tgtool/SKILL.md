@@ -334,6 +334,7 @@ Prefer installed `superpowers` workflow skills when they are a better fit than `
 Development-task default:
 
 - For implementation work, prefer the `superpowers` workflow family over direct execution.
+- If the user explicitly asks for multiple Codex agents, a virtual team, or parallel agent execution, evaluate `multi-codex orchestration` before ordinary single-session development routing.
 - When tgtool routes a task into `superpowers`, let `superpowers` choose and control its own internal development process.
 - Do not hard-code a fixed internal sequence such as `brainstorming -> writing-plans -> executing-plans` inside tgtool.
 - Keep tgtool responsible for global rules, mode behavior, visibility, boundaries, and support-skill selection while `superpowers` owns the development workflow once selected.
@@ -345,6 +346,12 @@ Development-task default:
 - Use `brainstorming`, `writing-plans`, or `executing-plans` directly only when the user explicitly asks for one of them, or when another active instruction already makes that specific entry point mandatory.
 - Use `$stream-coding`
   - For direct implementation once analysis and planning are already sufficient, or when the change is truly tiny and obvious
+
+Scenario-specific route:
+
+- Use `multi-codex orchestration`
+  - When the user explicitly wants multiple Codex agents or a virtual team, the task can be decomposed into 2+ relatively independent subproblems, sequential single-agent execution would be materially worse, and role-based ownership would improve throughput or confidence
+  - Do not use it for tiny fixes, tightly coupled single-threaded work, pure read-only diagnosis without real parallel value, or tasks that would create conflicting write scopes across agents
 
 Workflow boundary rule:
 
@@ -585,6 +592,8 @@ These are defaults and examples, not mandatory routes.
   - fast path or `tool-advisor` + `using-superpowers`, unless a specific superpowers entry skill was explicitly requested
 - Cross-session recall:
   - fast path or `tool-advisor` + `claude-mem`
+- Multi-Codex orchestration:
+  - `using-superpowers` + orchestration adapter when the user explicitly wants multiple Codex agents and the task can be split into safe parallel roles
 - Complex multi-step task with persistent working state:
   - `using-superpowers` + `planning-with-files` when disk-backed planning, findings, and progress tracking would materially help
 - Environment-aware execution:
