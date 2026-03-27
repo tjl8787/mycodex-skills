@@ -43,6 +43,12 @@ Do not use when any of these are true:
 
 ## Phase 1 Backend
 
+Helper assets included in this skill:
+- `scripts/bootstrap_session.py` to create a wrapper session file
+- `scripts/render_role_brief.py` to render a role-specific brief
+- `templates/session-example.json` as a starter payload
+
+
 Start with the `codex-native wrapper`.
 
 Map orchestration actions to existing Codex tools:
@@ -60,6 +66,9 @@ For Phase 1 implementation details, also see:
 - `docs/codex-native-wrapper-spec.md`
 - `docs/codex-native-wrapper-session-schema.md`
 - `docs/codex-native-wrapper-playbook.md`
+- `scripts/bootstrap_session.py`
+- `scripts/render_role_brief.py`
+- `templates/session-example.json`
 
 ## Process
 
