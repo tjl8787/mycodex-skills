@@ -1,0 +1,135 @@
+---
+name: multi-codex-orchestration
+description: Use when the user explicitly wants multiple Codex agents or a virtual team, the work can be decomposed into safe parallel roles, and tgtool should coordinate a codex-native orchestration path.
+---
+
+# Multi-Codex Orchestration
+
+## Overview
+
+Use this skill when a task should be executed by multiple Codex agents under a single routed session.
+
+This skill does not replace `tgtool`. It provides the Phase 1 orchestration method that `tgtool` can route into.
+
+Default backend:
+- `codex-native wrapper`
+
+Phase 2 backend:
+- `claude-flow` adapter when richer external orchestration is actually needed
+
+## When to Use
+
+Use when all of these are true:
+- the user explicitly wants multiple Codex agents, a virtual team, or parallel agent execution
+- the task can be decomposed into 2+ relatively independent roles
+- safe ownership boundaries can be defined
+- sequential single-agent execution would be materially worse
+
+Typical role set:
+- `planner`
+- `implementer`
+- `verifier`
+- `reviewer`
+- optional `researcher`
+
+## Do Not Use
+
+Do not use when any of these are true:
+- the task is tiny or obviously faster in one session
+- write ownership would overlap in unsafe ways
+- the work is pure read-only diagnosis without real parallel value
+- strict read-only mode leaves no meaningful orchestration path
+- the task is so coupled that role splitting would be artificial
+
+## Phase 1 Backend
+
+Start with the `codex-native wrapper`.
+
+Map orchestration actions to existing Codex tools:
+- spawn roles with `spawn_agent`
+- send role-specific work with `send_input`
+- collect role results with `wait_agent`
+- stop roles with `close_agent`
+- resume a role with `resume_agent` if needed
+
+Use the local backend first because it preserves current skills, current boundaries, and current Codex behavior.
+
+## Process
+
+### 1. Confirm orchestration eligibility
+
+Before spawning any role, confirm:
+- the task really benefits from parallel work
+- the role split is meaningful
+- write scopes can be kept disjoint
+- the selected mode and safety boundaries still allow orchestration
+
+If not, fall back instead of forcing orchestration.
+
+### 2. Choose the smallest safe role set
+
+Use the smallest role set that can safely move the task forward.
+
+Conservative default:
+- at most one `implementer`
+- `planner` is read-heavy
+- `verifier` owns validation, not main implementation
+- `reviewer` is advisory and read-heavy
+- add `researcher` only when discovery is clearly independent
+
+### 3. Define ownership explicitly
+
+For each role, state:
+- what it owns
+- what it must not edit
+- what output it must return
+
+Reject orchestration if ownership cannot be made clear enough.
+
+### 4. Execute through the codex-native wrapper
+
+Normalize the task into:
+- task summary
+- constraints
+- requested outcome
+- candidate roles
+- optional support layers
+- optional write-scope map
+
+Then run the roles through the Codex tool mapping.
+
+### 5. Normalize results
+
+Collect per-role outputs into a stable result shape:
+- orchestration session id
+- backend used
+- roles spawned
+- per-role status
+- blockers
+- merged summary
+- fallback recommendation if needed
+
+Return the merged result back into the active `tgtool` session.
+
+## Fallback Order
+
+If orchestration should not continue, fall back in this order:
+1. `subagent-driven-development`
+2. `dispatching-parallel-agents`
+3. ordinary `using-superpowers` routing
+4. single-session execution
+
+## Common Mistakes
+
+- Spawning too many roles before ownership is clear
+- Using two writing roles on the same files
+- Treating `reviewer` as a hidden second implementer
+- Forcing orchestration when the task is too small
+- Treating the external framework as the top-level router instead of `tgtool`
+
+## Remember
+
+- `tgtool` stays the entrypoint
+- Phase 1 uses the local `codex-native wrapper`
+- Phase 2 may introduce `claude-flow`, but only behind the adapter
+- prefer fewer roles over unsafe parallelism

@@ -3,7 +3,7 @@ name: tgtool
 description: Use when the user wants the agent to choose, combine, and actively use the best available local skills for a task.
 metadata:
   author: codex
-  version: "2.12.0"
+  version: "2.13.0"
 ---
 
 # TGTool
@@ -334,7 +334,7 @@ Prefer installed `superpowers` workflow skills when they are a better fit than `
 Development-task default:
 
 - For implementation work, prefer the `superpowers` workflow family over direct execution.
-- If the user explicitly asks for multiple Codex agents, a virtual team, or parallel agent execution, evaluate `multi-codex orchestration` before ordinary single-session development routing.
+- If the user explicitly asks for multiple Codex agents, a virtual team, or parallel agent execution, evaluate the `multi-codex-orchestration` skill before ordinary single-session development routing.
 - When tgtool routes a task into `superpowers`, let `superpowers` choose and control its own internal development process.
 - Do not hard-code a fixed internal sequence such as `brainstorming -> writing-plans -> executing-plans` inside tgtool.
 - Keep tgtool responsible for global rules, mode behavior, visibility, boundaries, and support-skill selection while `superpowers` owns the development workflow once selected.
@@ -349,10 +349,10 @@ Development-task default:
 
 Scenario-specific route:
 
-- Use `multi-codex orchestration`
+- Use `multi-codex-orchestration`
   - When the user explicitly wants multiple Codex agents or a virtual team, the task can be decomposed into 2+ relatively independent subproblems, sequential single-agent execution would be materially worse, and role-based ownership would improve throughput or confidence
   - Do not use it for tiny fixes, tightly coupled single-threaded work, pure read-only diagnosis without real parallel value, or tasks that would create conflicting write scopes across agents
-  - Prefer a `codex-native wrapper` as the initial backend; escalate to tmux-based orchestration only when the native wrapper is insufficient, and use heavier external frameworks only as a later backend option
+  - Prefer a `codex-native wrapper` as the Phase 1 backend; introduce a `claude-flow` adapter in Phase 2 only when richer external orchestration is actually needed
   - If orchestration is unavailable or rejected, fall back in this order: `subagent-driven-development`, `dispatching-parallel-agents`, then ordinary `using-superpowers` routing
   - Reject orchestration when write ownership cannot be made disjoint enough for safe parallel execution
 
@@ -596,7 +596,7 @@ These are defaults and examples, not mandatory routes.
 - Cross-session recall:
   - fast path or `tool-advisor` + `claude-mem`
 - Multi-Codex orchestration:
-  - `using-superpowers` + orchestration adapter when the user explicitly wants multiple Codex agents and the task can be split into safe parallel roles; prefer a `codex-native wrapper` backend first, mapped onto existing Codex agent tools
+  - `using-superpowers` + `multi-codex-orchestration` when the user explicitly wants multiple Codex agents and the task can be split into safe parallel roles; Phase 1 uses the `codex-native wrapper` backend
 - Complex multi-step task with persistent working state:
   - `using-superpowers` + `planning-with-files` when disk-backed planning, findings, and progress tracking would materially help
 - Environment-aware execution:
