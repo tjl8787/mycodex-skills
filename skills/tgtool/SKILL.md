@@ -3,7 +3,7 @@ name: tgtool
 description: Use when the user wants the agent to choose, combine, and actively use the best available local skills for a task.
 metadata:
   author: codex
-  version: "2.19.0"
+  version: "2.20.0"
 ---
 
 # TGTool
@@ -356,7 +356,10 @@ Scenario-specific route:
   - If the user explicitly wants visible foreground workers, tmux panes, or front windows, route the orchestration request through the `tmux-visible` backend instead of the default background path
   - If the user explicitly asks for a `ruflo` backend or asks to initialize the orchestration runtime, use `skills/multi-codex-orchestration/scripts/bootstrap_ruflo_backend.py` to automatically chain `ruflo init --codex`, `ruflo init --minimal --force`, and `ruflo swarm init --v3-mode` as needed
   - If the user explicitly asks to see multiple foreground workers, use `skills/multi-codex-orchestration/scripts/bootstrap_tmux_visible_backend.py` to create a visible tmux session and return its attach instructions
+  - For token-sensitive multi-agent work, prefer the `tmux-visible` backend in `shell` pane mode with `token_profile=lean`
   - In explicit `tmux-visible` mode, keep the main session and visible panes synchronized by using `skills/multi-codex-orchestration/scripts/broadcast_tmux_stage.py` at each major stage and `skills/multi-codex-orchestration/scripts/dispatch_tmux_role.py` for role-specific handoffs so the user can watch per-role progress live
+  - In token-sensitive orchestration, default the active pair to `implementer + verifier`; wake `planner` or `reviewer` Codex workers only when their outputs are actually needed
+  - Do not re-send the same large context block to multiple Codex workers by default; compress it first and send only role-specific deltas
   - If orchestration is unavailable or rejected, fall back in this order: `subagent-driven-development`, `dispatching-parallel-agents`, then ordinary `using-superpowers` routing
   - Reject orchestration when write ownership cannot be made disjoint enough for safe parallel execution
 

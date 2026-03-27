@@ -8,6 +8,7 @@ from pathlib import Path
 
 
 DEFAULT_ROLES = ["planner", "implementer", "verifier", "reviewer"]
+LEAN_ACTIVE_ROLES = ["implementer", "verifier"]
 
 
 def run(cmd: list[str], capture: bool = False) -> subprocess.CompletedProcess:
@@ -101,6 +102,7 @@ def build_layout(
     requested_outcome: str | None,
     launch_codex: bool,
     pane_mode: str,
+    token_profile: str,
 ) -> dict[str, str]:
     # session starts with pane 0
     while True:
@@ -120,7 +122,7 @@ def build_layout(
         banner = f'printf "\\n=== {role.upper()} ===\\nworkspace: %s\\n\\n" "{project_dir}"'
         run(["tmux", "send-keys", "-t", target, banner, "C-m"])
         run(["tmux", "select-pane", "-t", target, "-T", f"{role} ({pane_mode})"])
-        if launch_codex:
+        if launch_codex and (token_profile != "lean" or role in LEAN_ACTIVE_ROLES):
             launch_codex_worker(
                 session_name,
                 pane,
@@ -144,6 +146,7 @@ def write_state(
     attach_command: str,
     launch_codex: bool,
     pane_mode: str,
+    token_profile: str,
 ) -> Path:
     path = state_file_path(project_dir, session_name)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -156,6 +159,7 @@ def write_state(
         "attach_command": attach_command,
         "launch_codex": launch_codex,
         "pane_mode": pane_mode,
+        "token_profile": token_profile,
     }
     path.write_text(json.dumps(state, ensure_ascii=True, indent=2) + "\n", encoding="utf-8")
     return path
@@ -175,6 +179,12 @@ def main() -> None:
         choices=["shell", "codex"],
         default="shell",
         help="shell keeps panes controllable for real command execution; codex starts interactive Codex workers.",
+    )
+    parser.add_argument(
+        "--token-profile",
+        choices=["lean", "balanced", "full"],
+        default="lean",
+        help="lean keeps visible tmux orchestration cheap: prefer shell panes and avoid waking planner/reviewer Codex workers unless explicitly needed.",
     )
     parser.add_argument("--no-launch-codex", action="store_true")
     parser.add_argument("--json", action="store_true")
@@ -210,6 +220,7 @@ def main() -> None:
         args.requested_outcome,
         args.pane_mode == "codex" and not args.no_launch_codex,
         args.pane_mode,
+        args.token_profile,
     )
     attach_command = f"tmux attach -t {args.session_name}"
     state_path = write_state(
@@ -220,6 +231,7 @@ def main() -> None:
         attach_command,
         args.pane_mode == "codex" and not args.no_launch_codex,
         args.pane_mode,
+        args.token_profile,
     )
 
     result = {
@@ -230,6 +242,7 @@ def main() -> None:
         "created": created,
         "launch_codex": args.pane_mode == "codex" and not args.no_launch_codex,
         "pane_mode": args.pane_mode,
+        "token_profile": args.token_profile,
         "attach_command": attach_command,
         "state_file": str(state_path),
     }

@@ -33,6 +33,7 @@ Use `skills/multi-codex-orchestration/scripts/bootstrap_tmux_visible_backend.py`
 - split panes into the default role layout
 - label each pane with a role banner
 - prefer `shell` pane mode by default so each visible pane stays controllable and can execute real shell commands or one-shot `codex 'prompt'` runs
+- prefer `token_profile=lean` by default so the session keeps four visible panes but only treats the execution-critical roles as active Codex workers
 - use `codex` pane mode only when the user explicitly wants long-lived interactive Codex panes
 - write a session state file with stable role-to-pane targets
 - print the attach command
@@ -54,6 +55,15 @@ Use `skills/multi-codex-orchestration/scripts/broadcast_tmux_stage.py` when the 
 The intended pattern is:
 - stage change -> `broadcast_tmux_stage.py`
 - role-specific handoff -> `dispatch_tmux_role.py`
+
+## Token Guidance
+
+When token efficiency matters:
+- keep the visible pane layout, but avoid waking every pane as a Codex worker
+- default active roles to `implementer` and `verifier`
+- keep `planner` and `reviewer` passive until there is a real planning or review branch
+- prefer role-specific shell execution over one-shot Codex prompts
+- when a Codex prompt is necessary, send only a compressed role delta instead of the full main-session context
 
 ## Output Contract
 

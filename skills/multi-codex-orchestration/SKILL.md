@@ -16,6 +16,7 @@ Default backend:
 
 Visible backend:
 - `tmux-visible` when the user explicitly wants multiple foreground panes or windows
+- prefer a lean token profile unless the user explicitly asks for a full visible team with active planner/reviewer Codex workers
 
 Phase 2 backend:
 - `claude-flow` adapter when richer external orchestration is actually needed
@@ -32,6 +33,11 @@ Use when all of these are true:
 - the task can be decomposed into 2+ relatively independent roles
 - safe ownership boundaries can be defined
 - sequential single-agent execution would be materially worse
+
+Prefer a token-aware role set:
+- start with `implementer` + `verifier` as the active execution pair
+- keep `planner` and `reviewer` passive until a real planning/review branch appears
+- do not send the same long context to multiple Codex workers unless the output is genuinely different
 
 Typical role set:
 - `planner`
@@ -144,11 +150,14 @@ When the user explicitly wants visible foreground workers, tmux panes, or front 
 - enable `tmux set-option -s set-clipboard on`
 - keep the pane set conservative by default: `planner`, `implementer`, `verifier`, `reviewer`
 - prefer `shell` pane mode by default so visible workers can execute real commands and one-shot `codex 'prompt'` runs deterministically
+- prefer `token_profile=lean` by default so only the execution-critical roles are woken as Codex workers
 - use `codex` pane mode only when the user explicitly wants long-lived interactive Codex panes instead of controllable shell panes
 - treat this backend as visibility-first, not as the default orchestration path
 - keep a session state file so the main session can address roles deterministically
 - use `scripts/dispatch_tmux_role.py` at each major stage so the user can watch role-specific work appear in the panes in real time
 - use `scripts/broadcast_tmux_stage.py` when the main session changes stage and all visible panes should refresh together
+- do not wake `planner` or `reviewer` with one-shot Codex runs unless the main session truly needs their output
+- prefer shell commands in `implementer`/`verifier` panes over duplicating analysis with Codex prompts
 
 ### 5. Execute through the codex-native wrapper
 
