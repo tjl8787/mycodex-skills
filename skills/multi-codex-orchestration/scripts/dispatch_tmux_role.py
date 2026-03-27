@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import json
+import shlex
 import subprocess
 from pathlib import Path
 
@@ -40,7 +41,7 @@ def main() -> None:
 
     banner = (
         f'printf "\\n=== {args.prefix}: {args.role.upper()} ===\\n%s\\n\\n" '
-        f'{json.dumps(args.message)}'
+        f"{shlex.quote(args.message)}"
     )
     run(["tmux", "send-keys", "-t", target, banner, "C-m"])
 

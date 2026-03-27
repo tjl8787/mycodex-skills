@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import json
+import shlex
 import subprocess
 from pathlib import Path
 
@@ -31,7 +32,7 @@ def dispatch(target: str, role: str, message: str, prefix: str) -> None:
     run(["tmux", "select-pane", "-t", target, "-T", title])
     banner = (
         f'printf "\\n=== {prefix}: {role.upper()} ===\\n%s\\n\\n" '
-        f'{json.dumps(message)}'
+        f"{shlex.quote(message)}"
     )
     run(["tmux", "send-keys", "-t", target, banner, "C-m"])
 
