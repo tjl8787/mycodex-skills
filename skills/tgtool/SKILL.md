@@ -356,6 +356,9 @@ Scenario-specific route:
   - After `ruflo` bootstrap succeeds, prefer the current session's `claude_flow` orchestration tool family for actual execution: initialize a swarm, spawn agents, create tasks, assign tasks, and monitor status there instead of stopping at CLI bootstrap
   - Use `skills/multi-codex-orchestration/scripts/probe_ruflo_execution.py` only as a shell-side sanity check that the local `ruflo` CLI path can create a swarm, spawn an agent, create a task, and assign it; do not mistake that probe for the main in-session execution path
   - In token-sensitive orchestration, default to a single active `operator`; keep `critic` dormant and wake it only on failure, stage transition, or explicit review/feedback demand
+  - In explicit tmux mode, default to `2 pane` only (`operator + critic`) unless the user explicitly asks for more panes
+  - In explicit tmux mode, panes run commands only; explanatory text stays in the main Codex response
+  - If the user asks for explicit/visible execution, use `skills/multi-codex-orchestration/scripts/launch_explicit_tmux.py` and auto-try foreground popup instead of requiring manual attach first
   - Do not re-send the same large context block to multiple Codex workers by default; compress it first and send only role-specific deltas
   - If orchestration is unavailable or rejected, fall back in this order: `subagent-driven-development`, `dispatching-parallel-agents`, then ordinary `using-superpowers` routing
   - Reject orchestration when write ownership cannot be made disjoint enough for safe parallel execution
