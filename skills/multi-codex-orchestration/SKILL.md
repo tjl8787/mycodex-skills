@@ -62,6 +62,7 @@ Helper assets included in this skill:
 - `scripts/render_role_brief.py` to render a role-specific brief
 - `scripts/ensure_ruflo_init.py` to detect or initialize `ruflo` Codex/runtime state
 - `scripts/bootstrap_ruflo_backend.py` to automatically chain init and swarm bootstrap for `ruflo`
+- `scripts/probe_ruflo_execution.py` to shell-check that `ruflo` can create a swarm, spawn an agent, create a task, and assign it
 - `scripts/bootstrap_tmux_visible_backend.py` to open a visible tmux session with role panes
 - `scripts/dispatch_tmux_role.py` to stream main-session stage instructions into visible role panes
 - `scripts/broadcast_tmux_stage.py` to broadcast stage changes to all visible tmux role panes at once
@@ -89,11 +90,13 @@ For Phase 1 and Phase 2 implementation details, also see:
 - `docs/claude-flow-adapter-playbook.md`
 - `docs/ruflo-init-playbook.md`
 - `docs/ruflo-runtime-bootstrap-playbook.md`
+- `docs/ruflo-execution-playbook.md`
 - `docs/tmux-visible-backend-playbook.md`
 - `scripts/bootstrap_session.py`
 - `scripts/render_role_brief.py`
 - `scripts/ensure_ruflo_init.py`
 - `scripts/bootstrap_ruflo_backend.py`
+- `scripts/probe_ruflo_execution.py`
 - `scripts/bootstrap_tmux_visible_backend.py`
 - `scripts/dispatch_tmux_role.py`
 - `scripts/broadcast_tmux_stage.py`
@@ -142,6 +145,14 @@ When the user explicitly wants a `ruflo` backend or asks to initialize orchestra
 - let it ensure runtime state if missing
 - let it initialize a swarm through `ruflo swarm init --v3-mode`
 - keep daemon startup optional instead of making it part of the default chain
+- after bootstrap, prefer the current session's `claude_flow` orchestration tools for actual execution:
+  - initialize the working swarm
+  - spawn role agents
+  - create tasks
+  - assign tasks
+  - monitor swarm/task/agent status
+- treat raw `ruflo` CLI execution as a bootstrap and shell-side probe layer; do not rely on `ruflo swarm start` alone to mean real work is already being driven inside the current Codex session
+- use `scripts/probe_ruflo_execution.py` when you need a local shell sanity check that the `ruflo` CLI path can at least create the basic swarm/agent/task primitives cleanly
 
 When the user explicitly wants visible foreground workers, tmux panes, or front windows:
 - run `scripts/bootstrap_tmux_visible_backend.py`
@@ -170,6 +181,19 @@ Normalize the task into:
 - optional write-scope map
 
 Then run the roles through the Codex tool mapping.
+
+### 5.5. Execute through the Ruflo backend when explicitly selected
+
+If the user explicitly selects `ruflo`:
+- bootstrap runtime state first
+- then execute the live orchestration through the current session's `claude_flow` tools instead of stopping at CLI initialization
+- prefer this minimal execution chain:
+  - initialize swarm
+  - spawn the smallest safe role set
+  - create tracked tasks
+  - assign tasks to those agents
+  - poll task/agent/swarm status until the main session can summarize progress
+- only use the shell probe script to validate the local CLI boundary, not as the main long-running worker path
 
 ### 6. Normalize results
 
