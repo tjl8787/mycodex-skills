@@ -147,7 +147,11 @@ When the user explicitly wants a `ruflo` backend or asks to initialize orchestra
 - keep daemon startup optional instead of making it part of the default chain
 - after bootstrap, prefer the current session's `claude_flow` orchestration tools for actual execution:
   - initialize the working swarm
-  - spawn role agents
+  - start with only `operator` as the default active role
+  - let `operator` own concrete execution
+  - keep `critic` passive by default
+  - wake `critic` only on failure, stage transition, or explicit review/feedback demand
+  - spawn additional roles only when the task actually needs them
   - create tasks
   - assign tasks
   - monitor swarm/task/agent status
@@ -189,7 +193,10 @@ If the user explicitly selects `ruflo`:
 - then execute the live orchestration through the current session's `claude_flow` tools instead of stopping at CLI initialization
 - prefer this minimal execution chain:
   - initialize swarm
-  - spawn the smallest safe role set
+  - spawn only `operator` by default
+  - keep `critic` dormant until failure, phase change, or explicit review/feedback demand
+  - let `operator` execute and let `critic` act as an on-demand planning/verification/feedback role
+  - wake extra roles only if a real branch appears that cannot be covered by that policy
   - create tracked tasks
   - assign tasks to those agents
   - poll task/agent/swarm status until the main session can summarize progress

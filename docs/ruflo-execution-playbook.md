@@ -43,9 +43,10 @@ Use this order:
 - task status / agent status / swarm status
 
 Keep the role set conservative:
-- `implementer`
-- `verifier`
-- wake `planner` or `reviewer` only when the task truly needs them
+- `operator` for concrete execution
+- keep `critic` dormant by default
+- wake `critic` only on failure, stage transition, or explicit review/feedback demand
+- wake extra roles only when the task truly needs them
 
 ## Shell-Side Probe
 
