@@ -1,6 +1,6 @@
 ---
 name: multi-codex-orchestration
-description: Use when the user explicitly wants multiple Codex agents or a virtual team, the work can be decomposed into safe parallel roles, and tgtool should coordinate a codex-native orchestration path.
+description: Use when the user explicitly wants multiple Codex agents or a virtual team, the work can be decomposed into safe parallel roles, and tgtool should coordinate a Ruflo-backed orchestration path.
 ---
 
 # Multi-Codex Orchestration
@@ -9,22 +9,10 @@ description: Use when the user explicitly wants multiple Codex agents or a virtu
 
 Use this skill when a task should be executed by multiple Codex agents under a single routed session.
 
-This skill does not replace `tgtool`. It provides the Phase 1 orchestration method that `tgtool` can route into.
+This skill does not replace `tgtool`. It provides the Ruflo-backed orchestration method that `tgtool` can route into.
 
 Default backend:
-- `codex-native wrapper`
-
-Visible backend:
-- `tmux-visible` when the user explicitly wants multiple foreground panes or windows
-- prefer a lean token profile unless the user explicitly asks for a full visible team with active planner/reviewer Codex workers
-
-Phase 2 backend:
-- `claude-flow` adapter when richer external orchestration is actually needed
-
-Phase 2 helper assets included in this skill:
-- `scripts/build_claude_flow_payload.py` to map a normalized session into a `claude-flow` backend payload
-- `scripts/normalize_claude_flow_result.py` to map backend output back into the stable adapter result shape
-- `templates/claude-flow-result-example.json` as a sample backend result for normalization
+- `ruflo`
 
 ## When to Use
 
@@ -35,16 +23,14 @@ Use when all of these are true:
 - sequential single-agent execution would be materially worse
 
 Prefer a token-aware role set:
-- start with `implementer` + `verifier` as the active execution pair
-- keep `planner` and `reviewer` passive until a real planning/review branch appears
-- do not send the same long context to multiple Codex workers unless the output is genuinely different
+- start with only `operator` as the active role
+- keep `critic` dormant until a failure, stage transition, or explicit review/feedback demand appears
+- do not send the same long context to multiple workers unless the output is genuinely different
 
 Typical role set:
-- `planner`
-- `implementer`
-- `verifier`
-- `reviewer`
-- optional `researcher`
+- `operator`
+- `critic`
+- optional extra specialist only when the task truly needs one
 
 ## Do Not Use
 
@@ -55,55 +41,22 @@ Do not use when any of these are true:
 - strict read-only mode leaves no meaningful orchestration path
 - the task is so coupled that role splitting would be artificial
 
-## Phase 1 Backend
+## Ruflo Backend
 
 Helper assets included in this skill:
-- `scripts/bootstrap_session.py` to create a wrapper session file
-- `scripts/render_role_brief.py` to render a role-specific brief
 - `scripts/ensure_ruflo_init.py` to detect or initialize `ruflo` Codex/runtime state
 - `scripts/bootstrap_ruflo_backend.py` to automatically chain init and swarm bootstrap for `ruflo`
 - `scripts/probe_ruflo_execution.py` to shell-check that `ruflo` can create a swarm, spawn an agent, create a task, and assign it
-- `scripts/bootstrap_tmux_visible_backend.py` to open a visible tmux session with role panes
-- `scripts/dispatch_tmux_role.py` to stream main-session stage instructions into visible role panes
-- `scripts/broadcast_tmux_stage.py` to broadcast stage changes to all visible tmux role panes at once
-- `templates/session-example.json` as a starter payload
-
-
-Start with the `codex-native wrapper`.
-
-Map orchestration actions to existing Codex tools:
-- spawn roles with `spawn_agent`
-- send role-specific work with `send_input`
-- collect role results with `wait_agent`
-- stop roles with `close_agent`
-- resume a role with `resume_agent` if needed
-
-Use the local backend first because it preserves current skills, current boundaries, and current Codex behavior.
 
 ## Supporting References
 
-For Phase 1 and Phase 2 implementation details, also see:
-- `docs/codex-native-wrapper-spec.md`
-- `docs/codex-native-wrapper-session-schema.md`
-- `docs/codex-native-wrapper-playbook.md`
-- `docs/claude-flow-adapter-spec.md`
-- `docs/claude-flow-adapter-playbook.md`
+For implementation details, also see:
 - `docs/ruflo-init-playbook.md`
 - `docs/ruflo-runtime-bootstrap-playbook.md`
 - `docs/ruflo-execution-playbook.md`
-- `docs/tmux-visible-backend-playbook.md`
-- `scripts/bootstrap_session.py`
-- `scripts/render_role_brief.py`
 - `scripts/ensure_ruflo_init.py`
 - `scripts/bootstrap_ruflo_backend.py`
 - `scripts/probe_ruflo_execution.py`
-- `scripts/bootstrap_tmux_visible_backend.py`
-- `scripts/dispatch_tmux_role.py`
-- `scripts/broadcast_tmux_stage.py`
-- `scripts/build_claude_flow_payload.py`
-- `scripts/normalize_claude_flow_result.py`
-- `templates/session-example.json`
-- `templates/claude-flow-result-example.json`
 
 ## Process
 
@@ -122,11 +75,9 @@ If not, fall back instead of forcing orchestration.
 Use the smallest role set that can safely move the task forward.
 
 Conservative default:
-- at most one `implementer`
-- `planner` is read-heavy
-- `verifier` owns validation, not main implementation
-- `reviewer` is advisory and read-heavy
-- add `researcher` only when discovery is clearly independent
+- one active `operator`
+- one dormant `critic`
+- add an extra specialist only when discovery or review cannot be covered by that pair
 
 ### 3. Define ownership explicitly
 
@@ -158,35 +109,7 @@ When the user explicitly wants a `ruflo` backend or asks to initialize orchestra
 - treat raw `ruflo` CLI execution as a bootstrap and shell-side probe layer; do not rely on `ruflo swarm start` alone to mean real work is already being driven inside the current Codex session
 - use `scripts/probe_ruflo_execution.py` when you need a local shell sanity check that the `ruflo` CLI path can at least create the basic swarm/agent/task primitives cleanly
 
-When the user explicitly wants visible foreground workers, tmux panes, or front windows:
-- run `scripts/bootstrap_tmux_visible_backend.py`
-- create a named tmux session with one pane per role
-- enable `tmux set-option -g mouse on`
-- enable `tmux set-option -s set-clipboard on`
-- keep the pane set conservative by default: `planner`, `implementer`, `verifier`, `reviewer`
-- prefer `shell` pane mode by default so visible workers can execute real commands and one-shot `codex 'prompt'` runs deterministically
-- prefer `token_profile=lean` by default so only the execution-critical roles are woken as Codex workers
-- use `codex` pane mode only when the user explicitly wants long-lived interactive Codex panes instead of controllable shell panes
-- treat this backend as visibility-first, not as the default orchestration path
-- keep a session state file so the main session can address roles deterministically
-- use `scripts/dispatch_tmux_role.py` at each major stage so the user can watch role-specific work appear in the panes in real time
-- use `scripts/broadcast_tmux_stage.py` when the main session changes stage and all visible panes should refresh together
-- do not wake `planner` or `reviewer` with one-shot Codex runs unless the main session truly needs their output
-- prefer shell commands in `implementer`/`verifier` panes over duplicating analysis with Codex prompts
-
-### 5. Execute through the codex-native wrapper
-
-Normalize the task into:
-- task summary
-- constraints
-- requested outcome
-- candidate roles
-- optional support layers
-- optional write-scope map
-
-Then run the roles through the Codex tool mapping.
-
-### 5.5. Execute through the Ruflo backend when explicitly selected
+### 5. Execute through the Ruflo backend when explicitly selected
 
 If the user explicitly selects `ruflo`:
 - bootstrap runtime state first
@@ -234,8 +157,5 @@ If orchestration should not continue, fall back in this order:
 ## Remember
 
 - `tgtool` stays the entrypoint
-- Phase 1 uses the local `codex-native wrapper`
-- visible terminal workers use the `tmux-visible` backend only when the user explicitly asks for foreground panes or windows
 - explicit `ruflo` backend requests may first run `scripts/bootstrap_ruflo_backend.py` to initialize Codex/runtime state and a swarm automatically
-- Phase 2 introduces `claude-flow`, but only behind the adapter
 - prefer fewer roles over unsafe parallelism

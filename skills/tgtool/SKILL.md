@@ -352,14 +352,9 @@ Scenario-specific route:
   - Use `multi-codex-orchestration`
   - When the user explicitly wants multiple Codex agents or a virtual team, the task can be decomposed into 2+ relatively independent subproblems, sequential single-agent execution would be materially worse, and role-based ownership would improve throughput or confidence
   - Do not use it for tiny fixes, tightly coupled single-threaded work, pure read-only diagnosis without real parallel value, or tasks that would create conflicting write scopes across agents
-  - Prefer a `codex-native wrapper` as the Phase 1 backend; introduce a `claude-flow` adapter in Phase 2 only when richer external orchestration is actually needed
-  - If the user explicitly wants visible foreground workers, tmux panes, or front windows, route the orchestration request through the `tmux-visible` backend instead of the default background path
   - If the user explicitly asks for a `ruflo` backend or asks to initialize the orchestration runtime, first use `skills/multi-codex-orchestration/scripts/bootstrap_ruflo_backend.py` to automatically chain `ruflo init --codex`, `ruflo init --minimal --force`, and `ruflo swarm init --v3-mode` as needed
   - After `ruflo` bootstrap succeeds, prefer the current session's `claude_flow` orchestration tool family for actual execution: initialize a swarm, spawn agents, create tasks, assign tasks, and monitor status there instead of stopping at CLI bootstrap
   - Use `skills/multi-codex-orchestration/scripts/probe_ruflo_execution.py` only as a shell-side sanity check that the local `ruflo` CLI path can create a swarm, spawn an agent, create a task, and assign it; do not mistake that probe for the main in-session execution path
-  - If the user explicitly asks to see multiple foreground workers, use `skills/multi-codex-orchestration/scripts/bootstrap_tmux_visible_backend.py` to create a visible tmux session and return its attach instructions
-  - For token-sensitive multi-agent work, prefer the `tmux-visible` backend in `shell` pane mode with `token_profile=lean`
-  - In explicit `tmux-visible` mode, keep the main session and visible panes synchronized by using `skills/multi-codex-orchestration/scripts/broadcast_tmux_stage.py` at each major stage and `skills/multi-codex-orchestration/scripts/dispatch_tmux_role.py` for role-specific handoffs so the user can watch per-role progress live
   - In token-sensitive orchestration, default to a single active `operator`; keep `critic` dormant and wake it only on failure, stage transition, or explicit review/feedback demand
   - Do not re-send the same large context block to multiple Codex workers by default; compress it first and send only role-specific deltas
   - If orchestration is unavailable or rejected, fall back in this order: `subagent-driven-development`, `dispatching-parallel-agents`, then ordinary `using-superpowers` routing
@@ -605,7 +600,7 @@ These are defaults and examples, not mandatory routes.
 - Cross-session recall:
   - fast path or `tool-advisor` + `claude-mem`
 - Multi-Codex orchestration:
-  - `using-superpowers` + `multi-codex-orchestration` when the user explicitly wants multiple Codex agents and the task can be split into safe parallel roles; Phase 1 uses the `codex-native wrapper` backend, and explicit `ruflo` backend requests should now run `bootstrap_ruflo_backend.py` first and then execute real orchestration through the current session's `claude_flow` swarm/agent/task tools
+  - `using-superpowers` + `multi-codex-orchestration` when the user explicitly wants multiple Codex agents and the task can be split into safe parallel roles; explicit `ruflo` backend requests should run `bootstrap_ruflo_backend.py` first and then execute real orchestration through the current session's `claude_flow` swarm/agent/task tools
 - Complex multi-step task with persistent working state:
   - `using-superpowers` + `planning-with-files` when disk-backed planning, findings, and progress tracking would materially help
 - Environment-aware execution:
