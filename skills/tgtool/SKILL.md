@@ -3,7 +3,7 @@ name: tgtool
 description: Use when the user wants the agent to choose, combine, and actively use the best available local skills for a task.
 metadata:
   author: codex
-  version: "2.21.0"
+  version: "2.22.0"
 ---
 
 # TGTool
@@ -17,12 +17,30 @@ Its job is to pick the **smallest useful skill set**, avoid redundant loading, a
 Route in layers:
 
 1. Reuse current context first
-2. Confirm what the current environment can already do
-3. Choose one primary workflow skill
-4. Add only the minimum supporting capabilities
-5. Execute instead of lingering in skill-selection mode
+2. Read lightweight capability index first (lazy)
+3. Confirm what the current environment can already do
+4. Choose one primary workflow skill
+5. Add only the minimum supporting capabilities
+6. Execute instead of lingering in skill-selection mode
 
 The goal is not to use more skills. The goal is to use fewer, better.
+
+## Context loading mode
+
+Default mode is `lazy`.
+
+- `lazy` (default)
+  - do not load all skill bodies at start
+  - read `skills/tgtool/skills-index.json` first
+  - shortlist likely skills from index fields (`skill_id`, `summary`, `tags`, `triggers`)
+  - open only shortlisted `SKILL.md` files when needed
+- `full` (fallback)
+  - allowed only when explicitly requested by user or when index is missing/corrupted and user approved fallback
+
+Override switch:
+
+- `TGTOOL_CONTEXT_MODE=lazy|full`
+- if unset, treat as `lazy`
 
 ## Mode selection
 
@@ -258,6 +276,24 @@ Reuse this snapshot before re-reading files, skills, or prior context. Update it
 
 Apply this flow in order.
 
+### Step 0: Resolution gate for missing skills/tools
+
+When tgtool needs to use any skill/tool (whether user-specified or internally selected), resolve that target first.
+
+If the target skill/tool cannot be resolved immediately:
+
+- stop automatic fallback
+- report the miss clearly (what tgtool attempted to use and what was not found)
+- propose the exact next fallback steps in order (for example: local path search, then `find-skills`, then `tool_search`)
+- ask for explicit user approval before executing those fallback steps
+
+Approval rule:
+
+- in `standard` and `review`: always wait for explicit user approval before fallback execution
+- in `autopilot`: missing skill/tool still requires explicit user approval before fallback execution
+
+Do not silently switch to a different skill/tool when the intended one was not found.
+
 ### Step 1: Check whether routing is even needed
 
 Do not over-route.
@@ -274,11 +310,18 @@ Use the lowest evidence level that is safe.
   - the current conversation and snapshot are sufficient
   - do not read extra skill files or environment files
 - `L1`
+  - read `skills/tgtool/skills-index.json`
   - read only the target skill file that you already expect to use
 - `L2`
   - inspect environment, additional skills, memory, or external sources because there is real uncertainty
 
 Default to `L0` or `L1`. Escalate to `L2` only when it materially improves correctness.
+
+Index-first rule:
+
+- in `lazy` mode, never bulk-read all `SKILL.md` files for capability scanning
+- when uncertainty remains after index read, expand only top `1-3` candidate skill files
+- keep non-selected skill bodies unopened
 
 ### Step 3: Fast-path precheck
 
@@ -325,6 +368,12 @@ Use it to answer:
 
 Do not use `$tool-advisor` as an excuse to reload everything. Use it to reduce uncertainty.
 
+Lazy interaction rule:
+
+- `tool-advisor` confirms capability surface
+- index narrows likely skills
+- only shortlisted skill bodies are opened for final route selection
+
 ### Step 5: Choose one primary workflow skill
 
 Choose exactly one unless the task clearly moves across phases.
@@ -357,8 +406,7 @@ Scenario-specific route:
   - Use `skills/multi-codex-orchestration/scripts/probe_ruflo_execution.py` only as a shell-side sanity check that the local `ruflo` CLI path can create a swarm, spawn an agent, create a task, and assign it; do not mistake that probe for the main in-session execution path
   - In token-sensitive orchestration, default to a single active `operator`; keep `critic` dormant and wake it only on failure, stage transition, or explicit review/feedback demand
   - In explicit tmux mode, default to `2 pane` only (`operator + critic`) unless the user explicitly asks for more panes
-  - In explicit tmux mode, panes run commands only; explanatory text stays in the main Codex response
-  - If the user asks for explicit/visible execution, use `skills/multi-codex-orchestration/scripts/launch_explicit_tmux.py` and auto-try foreground popup instead of requiring manual attach first
+  - If the user asks for explicit/visible execution, use `skills/multi-codex-orchestration/scripts/launch_explicit_tmux.py` and treat “explicit” as auto-trying to pop a foreground tmux terminal, not requiring manual attach first
   - Do not re-send the same large context block to multiple Codex workers by default; compress it first and send only role-specific deltas
   - If orchestration is unavailable or rejected, fall back in this order: `subagent-driven-development`, `dispatching-parallel-agents`, then ordinary `using-superpowers` routing
   - Reject orchestration when write ownership cannot be made disjoint enough for safe parallel execution
@@ -422,6 +470,25 @@ Use it as a support layer, not a replacement workflow:
 - add `planning-with-files` only when disk-backed plan, findings, and progress tracking would materially improve execution or recovery
 - do not make `planning-with-files` the default primary workflow for ordinary coding tasks
 
+#### `jstorcli-yatc-jetice-ops`
+
+Use when:
+
+- the task involves `jstorcli` workflows with `yatc`, `jetice`, or `jetlake`
+- VM lifecycle, image preparation, deployment checks, or command lookup is part of execution
+- avoiding hardcoded local paths is important for correctness and portability
+
+Do not use when:
+
+- the task is unrelated to `jstorcli` or those environments
+- generic workflow skills already fully cover the need without environment-specific operational guidance
+
+Use it as a domain support layer:
+
+- keep one primary workflow skill selected by tgtool
+- add `jstorcli-yatc-jetice-ops` only when those operations are actually in scope
+- remove it from the active skill set once the environment-specific step is completed
+
 
 #### `exa`
 
@@ -449,6 +516,12 @@ Use `find-skills` only when at least one of these harder conditions is true:
 - installing or discovering a skill is likely to improve quality more than handling the task ad hoc
 
 Do not use when the current installed skills already clearly cover the task.
+
+If the intended skill was not found (user-specified or internally selected by tgtool):
+
+- do not call `find-skills` immediately
+- first report the miss and ask for explicit approval of the fallback plan
+- call `find-skills` only after approval
 
 Prefer direct handling instead of `find-skills` when one or more of these are true:
 
@@ -608,6 +681,8 @@ These are defaults and examples, not mandatory routes.
   - `using-superpowers` + `planning-with-files` when disk-backed planning, findings, and progress tracking would materially help
 - Environment-aware execution:
   - `tool-advisor`
+- Jstorcli / Yatc / Jetice / Jetlake operations:
+  - primary workflow skill + `jstorcli-yatc-jetice-ops` as a domain support layer when those environment-specific operations are in scope
 - Ambiguous design work:
   - fast path or `tool-advisor` + `using-superpowers`, unless a specific design skill was explicitly requested
 - External research:
@@ -629,3 +704,13 @@ It should:
 4. move into execution quickly
 
 It should not become a second planning layer that delays work.
+
+## Index maintenance
+
+Keep the lazy index fresh:
+
+- source of truth for behavior remains each skill's `SKILL.md`
+- `skills/tgtool/skills-index.json` is a routing index, not policy authority
+- rebuild index after adding/removing/renaming skills or changing frontmatter descriptions
+- rebuild command:
+  - `node skills/tgtool/scripts/build_skills_index.js`

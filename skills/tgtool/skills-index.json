@@ -1,0 +1,550 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-04-29T03:06:40.180Z",
+  "mode_default": "lazy",
+  "fallback_mode": "full",
+  "total_skills": 43,
+  "skills": [
+    {
+      "skill_id": "api-gateway",
+      "path": "skills/api-gateway/SKILL.md",
+      "summary": "AWS API Gateway for REST and HTTP API management. Use when creating APIs, configuring integrations, setting up authorization, managing stages, implementing rate limiting, or troubleshooting API issues.",
+      "tags": [
+        "api",
+        "aws",
+        "gateway"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "bedrock",
+      "path": "skills/bedrock/SKILL.md",
+      "summary": "AWS Bedrock foundation models for generative AI. Use when invoking foundation models, building AI applications, creating embeddings, configuring model access, or implementing RAG patterns.",
+      "tags": [
+        "aws",
+        "bedrock"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "brainstorming",
+      "path": "skills/brainstorming/SKILL.md",
+      "summary": "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.",
+      "tags": [
+        "brainstorming"
+      ],
+      "triggers": [
+        "description:must-use"
+      ]
+    },
+    {
+      "skill_id": "bucketmanager-s3control-e2e",
+      "path": "skills/bucketmanager-s3control-e2e/SKILL.md",
+      "summary": "Rebuild and run the local bucketmanager final image, then execute the current S3Control bitmap-based end-to-end workflow for minimal validation or 300MB memory-peak tests. Use when testing local multi-s3gw S3Control parent/child jobs in this repository.",
+      "tags": [
+        "bucketmanager",
+        "e2e",
+        "memory",
+        "s3control",
+        "test"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "claude-mem-codex",
+      "path": "skills/claude-mem-codex/SKILL.md",
+      "summary": "Use claude-mem from Codex via a Codex-specific wrapper, MCP registration, and ~/.codex-backed data paths.",
+      "tags": [
+        "claude",
+        "codex",
+        "mem"
+      ],
+      "triggers": []
+    },
+    {
+      "skill_id": "cloudformation",
+      "path": "skills/cloudformation/SKILL.md",
+      "summary": "AWS CloudFormation infrastructure as code for stack management. Use when writing templates, deploying stacks, managing drift, troubleshooting deployments, or organizing infrastructure with nested stacks.",
+      "tags": [
+        "aws",
+        "cloudformation"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "cloudwatch",
+      "path": "skills/cloudwatch/SKILL.md",
+      "summary": "AWS CloudWatch monitoring for logs, metrics, alarms, and dashboards. Use when setting up monitoring, creating alarms, querying logs with Insights, configuring metric filters, building dashboards, or troubleshooting application issues.",
+      "tags": [
+        "aws",
+        "cloudwatch"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "cognito",
+      "path": "skills/cognito/SKILL.md",
+      "summary": "AWS Cognito user authentication and authorization service. Use when setting up user pools, configuring identity pools, implementing OAuth flows, managing user attributes, or integrating with social identity providers.",
+      "tags": [
+        "aws",
+        "cognito"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "dispatching-parallel-agents",
+      "path": "skills/dispatching-parallel-agents/SKILL.md",
+      "summary": "Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies",
+      "tags": [
+        "agents",
+        "dispatching",
+        "parallel"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "dynamodb",
+      "path": "skills/dynamodb/SKILL.md",
+      "summary": "AWS DynamoDB NoSQL database for scalable data storage. Use when designing table schemas, writing queries, configuring indexes, managing capacity, implementing single-table design, or troubleshooting performance issues.",
+      "tags": [
+        "aws",
+        "dynamodb"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "ec2",
+      "path": "skills/ec2/SKILL.md",
+      "summary": "AWS EC2 virtual machine management for instances, AMIs, and networking. Use when launching instances, configuring security groups, managing key pairs, troubleshooting connectivity, or automating instance lifecycle.",
+      "tags": [
+        "aws",
+        "ec2",
+        "security"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "ecs",
+      "path": "skills/ecs/SKILL.md",
+      "summary": "AWS ECS container orchestration for running Docker containers. Use when deploying containerized applications, configuring task definitions, setting up services, managing clusters, or troubleshooting container issues.",
+      "tags": [
+        "aws",
+        "ecs",
+        "orchestration"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "eks",
+      "path": "skills/eks/SKILL.md",
+      "summary": "AWS EKS Kubernetes management for clusters, node groups, and workloads. Use when creating clusters, configuring IRSA, managing node groups, deploying applications, or integrating with AWS services.",
+      "tags": [
+        "aws",
+        "eks"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "eventbridge",
+      "path": "skills/eventbridge/SKILL.md",
+      "summary": "AWS EventBridge serverless event bus for event-driven architectures. Use when creating rules, configuring event patterns, setting up scheduled events, integrating with SaaS, or building cross-account event routing.",
+      "tags": [
+        "aws",
+        "eventbridge"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "executing-plans",
+      "path": "skills/executing-plans/SKILL.md",
+      "summary": "Use when you have a written implementation plan to execute in a separate session with review checkpoints",
+      "tags": [
+        "executing",
+        "plan",
+        "plans",
+        "review"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "find-skills",
+      "path": "skills/find-skills/SKILL.md",
+      "summary": "Helps users discover and install agent skills when they ask questions like \"how do I do X\", \"find a skill for X\", \"is there a skill that can...\", or express interest in extending capabilities. This skill should be used when the user is looking for functionality that might exist as an installable skill.",
+      "tags": [
+        "find",
+        "skills"
+      ],
+      "triggers": []
+    },
+    {
+      "skill_id": "finishing-a-development-branch",
+      "path": "skills/finishing-a-development-branch/SKILL.md",
+      "summary": "Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup",
+      "tags": [
+        "a",
+        "branch",
+        "development",
+        "finishing",
+        "test"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "fuse",
+      "path": "skills/fuse/SKILL.md",
+      "summary": "Build, debug, and review Linux FUSE filesystems with the official libfuse userspace library. Use when implementing a FUSE filesystem, choosing between libfuse high-level vs low-level APIs, wiring callbacks, building with fuse3/pkg-config, mounting for local testing, or troubleshooting fusermount3 and permission issues.",
+      "tags": [
+        "debug",
+        "fuse",
+        "review",
+        "test"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "iam",
+      "path": "skills/iam/SKILL.md",
+      "summary": "AWS Identity and Access Management for users, roles, policies, and permissions. Use when creating IAM policies, configuring cross-account access, setting up service roles, troubleshooting permission errors, or managing access control.",
+      "tags": [
+        "aws",
+        "iam"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "jstorcli-yatc-jetice-ops",
+      "path": "skills/jstorcli-yatc-jetice-ops/SKILL.md",
+      "summary": "Use when operating jstorcli with yatc and jetice/jetlake workflows, especially for VM lifecycle, image prep, deployment checks, and command lookup without hardcoded paths.",
+      "tags": [
+        "jetice",
+        "jstorcli",
+        "ops",
+        "yatc"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "lambda",
+      "path": "skills/lambda/SKILL.md",
+      "summary": "AWS Lambda serverless functions for event-driven compute. Use when creating functions, configuring triggers, debugging invocations, optimizing cold starts, setting up event source mappings, or managing layers.",
+      "tags": [
+        "aws",
+        "debug",
+        "lambda"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "multi-codex-orchestration",
+      "path": "skills/multi-codex-orchestration/SKILL.md",
+      "summary": "Use when the user explicitly wants multiple Codex agents or a virtual team, the work can be decomposed into safe parallel roles, and tgtool should coordinate a Ruflo-backed orchestration path.",
+      "tags": [
+        "codex",
+        "multi",
+        "orchestration"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "openai-docs",
+      "path": "skills/openai-docs/SKILL.md",
+      "summary": "Use when the user asks how to build with OpenAI products or APIs and needs up-to-date official documentation with citations (for example: Codex, Responses API, Chat Completions, Apps SDK, Agents SDK, Realtime, model capabilities or limits); prioritize OpenAI docs MCP tools and restrict any fallback browsing to official OpenAI domains.",
+      "tags": [
+        "docs",
+        "openai"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "planning-with-files",
+      "path": "skills/planning-with-files/SKILL.md",
+      "summary": "Implements Manus-style file-based planning to organize and track progress on complex tasks. Creates task_plan.md, findings.md, and progress.md. Use when asked to plan out, break down, or organize a multi-step project, research task, or any work requiring >5 tool calls. Supports automatic session recovery after /clear.",
+      "tags": [
+        "files",
+        "plan",
+        "planning",
+        "with"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "rds",
+      "path": "skills/rds/SKILL.md",
+      "summary": "AWS RDS relational database service for managed databases. Use when provisioning databases, configuring backups, managing replicas, troubleshooting connectivity, or optimizing performance.",
+      "tags": [
+        "aws",
+        "rds"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "receiving-code-review",
+      "path": "skills/receiving-code-review/SKILL.md",
+      "summary": "Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation",
+      "tags": [
+        "code",
+        "receiving",
+        "review"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "requesting-code-review",
+      "path": "skills/requesting-code-review/SKILL.md",
+      "summary": "Use when completing tasks, implementing major features, or before merging to verify work meets requirements",
+      "tags": [
+        "code",
+        "requesting",
+        "review"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "s3",
+      "path": "skills/s3/SKILL.md",
+      "summary": "AWS S3 object storage for bucket management, object operations, and access control. Use when creating buckets, uploading files, configuring lifecycle policies, setting up static websites, managing permissions, or implementing cross-region replication.",
+      "tags": [
+        "aws",
+        "s3"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "secrets-manager",
+      "path": "skills/secrets-manager/SKILL.md",
+      "summary": "AWS Secrets Manager for secure secret storage and rotation. Use when storing credentials, configuring automatic rotation, managing secret versions, retrieving secrets in applications, or integrating with RDS.",
+      "tags": [
+        "aws",
+        "manager",
+        "secrets"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "sns",
+      "path": "skills/sns/SKILL.md",
+      "summary": "AWS SNS notification service for pub/sub messaging. Use when creating topics, managing subscriptions, configuring message filtering, sending notifications, or setting up mobile push.",
+      "tags": [
+        "aws",
+        "sns"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "sqs",
+      "path": "skills/sqs/SKILL.md",
+      "summary": "AWS SQS message queue service for decoupled architectures. Use when creating queues, configuring dead-letter queues, managing visibility timeouts, implementing FIFO ordering, or integrating with Lambda.",
+      "tags": [
+        "aws",
+        "sqs"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "step-functions",
+      "path": "skills/step-functions/SKILL.md",
+      "summary": "AWS Step Functions workflow orchestration with state machines. Use when designing workflows, implementing error handling, configuring parallel execution, integrating with AWS services, or debugging executions.",
+      "tags": [
+        "aws",
+        "debug",
+        "functions",
+        "orchestration",
+        "step"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "stream-coding",
+      "path": "skills/stream-coding/SKILL.md",
+      "summary": "Documentation-first development methodology. The goal is AI-ready documentation - when docs are clear enough, code generation becomes automatic. Triggers on \"Build\", \"Create\", \"Implement\", \"Document\", or \"Spec out\". Version 3.5 adds Phase 2.5 Adversarial Review and renames internal verification to Spec Gate (structural completeness). Clarity Gate is now a separate standalone tool for epistemic quality.",
+      "tags": [
+        "coding",
+        "review",
+        "stream"
+      ],
+      "triggers": []
+    },
+    {
+      "skill_id": "subagent-driven-development",
+      "path": "skills/subagent-driven-development/SKILL.md",
+      "summary": "Use when executing implementation plans with independent tasks in the current session",
+      "tags": [
+        "development",
+        "driven",
+        "plan",
+        "subagent"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "systematic-debugging",
+      "path": "skills/systematic-debugging/SKILL.md",
+      "summary": "Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes",
+      "tags": [
+        "debugging",
+        "systematic",
+        "test"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "test-driven-development",
+      "path": "skills/test-driven-development/SKILL.md",
+      "summary": "Use when implementing any feature or bugfix, before writing implementation code",
+      "tags": [
+        "development",
+        "driven",
+        "test"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "tgtool",
+      "path": "skills/tgtool/SKILL.md",
+      "summary": "Use when the user wants the agent to choose, combine, and actively use the best available local skills for a task.",
+      "tags": [
+        "tgtool"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "tool-advisor",
+      "path": "skills/tool-advisor/SKILL.md",
+      "summary": "Discovers your full tool environment and amplifies prompts with capability awareness. Suggests optimal tool compositions as non-binding options.",
+      "tags": [
+        "advisor",
+        "tool"
+      ],
+      "triggers": []
+    },
+    {
+      "skill_id": "using-git-worktrees",
+      "path": "skills/using-git-worktrees/SKILL.md",
+      "summary": "Use when starting feature work that needs isolation from current workspace or before executing implementation plans - creates isolated git worktrees with smart directory selection and safety verification",
+      "tags": [
+        "git",
+        "plan",
+        "using",
+        "worktrees"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "using-superpowers",
+      "path": "skills/using-superpowers/SKILL.md",
+      "summary": "Use when starting any conversation - establishes how to find and use skills, requiring Skill tool invocation before ANY response including clarifying questions",
+      "tags": [
+        "superpowers",
+        "using"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "verification-before-completion",
+      "path": "skills/verification-before-completion/SKILL.md",
+      "summary": "Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always",
+      "tags": [
+        "before",
+        "completion",
+        "verification"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "writing-plans",
+      "path": "skills/writing-plans/SKILL.md",
+      "summary": "Use when you have a spec or requirements for a multi-step task, before touching code",
+      "tags": [
+        "plans",
+        "writing"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    },
+    {
+      "skill_id": "writing-skills",
+      "path": "skills/writing-skills/SKILL.md",
+      "summary": "Use when creating new skills, editing existing skills, or verifying skills work before deployment",
+      "tags": [
+        "skills",
+        "writing"
+      ],
+      "triggers": [
+        "description:use-when"
+      ]
+    }
+  ]
+}
