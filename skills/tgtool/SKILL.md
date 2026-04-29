@@ -280,6 +280,19 @@ Apply this flow in order.
 
 When tgtool needs to use any skill/tool (whether user-specified or internally selected), resolve that target first.
 
+For skills, resolve in this strict order:
+
+1. active and enabled in current session
+2. present locally but currently not enabled
+3. not present locally
+
+If a skill is present locally but not enabled:
+
+- auto-enable it as a temporary runtime skill for the current task
+- continue execution immediately
+- do not trigger fallback routing for this case
+- mark it for automatic disable at task closeout
+
 If the target skill/tool cannot be resolved immediately:
 
 - stop automatic fallback
@@ -293,6 +306,7 @@ Approval rule:
 - in `autopilot`: missing skill/tool still requires explicit user approval before fallback execution
 
 Do not silently switch to a different skill/tool when the intended one was not found.
+Do not treat "present locally but not enabled" as "not found".
 
 ### Step 1: Check whether routing is even needed
 
@@ -537,6 +551,12 @@ After routing, open only the selected skill files and follow them.
 Do not browse every skill body.
 Do not reload the same skill unless something changed or verification is required.
 
+If tgtool auto-enabled any local skill for this task:
+
+- keep it enabled only for the active task scope
+- disable it automatically at closeout
+- include one short line in the completion recap listing which skills were temporarily enabled and then disabled
+
 ## Long-context policy
 
 When inputs are large, old, or repetitive:
@@ -563,6 +583,55 @@ If a task is long-running:
 
 - use `claude-mem` only if the added recall value is real
 - otherwise stay with current-session incremental context
+
+## Context bloat guard and restart handoff
+
+Continuously estimate whether the current session context is becoming bloated.
+
+Primary trigger uses context-window percentage when available:
+
+- above `70%`: issue an early warning and recommend preparing handoff
+- above `85%`: start Phase A preview handoff suggestion
+- above `92%`: recommend immediate Phase B final handoff and session switch
+
+Explicit invocation hook:
+
+- when the user explicitly invokes `$tgtool` in a turn, run `skills/tgtool/scripts/context_guard.js` once before deeper routing
+- use this call shape:
+  - `node skills/tgtool/scripts/context_guard.js --input-text "<current turn text>"`
+- use the script output `estimated_context_pct` as the percentage source for the `70/85/92` threshold logic in this section
+
+When a threshold is reached:
+
+1. Tell the user context is now high-risk for token waste.
+2. Ask one direct question: whether to start restart handoff now.
+3. Do not continue deep execution until the user answers.
+
+If user agrees to restart handoff, run in two phases:
+
+- Phase A (preview only)
+  - generate a compact preview handoff first
+  - show it and ask for confirmation to finalize
+- Phase B (final handoff pack)
+  - after confirmation, produce final `summary + compact evidence`
+  - write the handoff pack to:
+    - `docs/session-handoffs/YYYY-MM-DD-<topic>.md`
+  - keep the pack short and executable for the next session
+
+Handoff pack must include:
+
+- objective
+- completed work
+- key decisions
+- open risks or blockers
+- next first action
+- compact evidence (only critical logs, errors, or file refs)
+
+Session switch boundary:
+
+- tgtool cannot programmatically force the client UI to create a new session
+- after final handoff pack is written, instruct user to open a new session
+- in the new session, first step is to read the handoff file and continue from it
 
 ## Memory writeback policy
 
@@ -714,3 +783,32 @@ Keep the lazy index fresh:
 - rebuild index after adding/removing/renaming skills or changing frontmatter descriptions
 - rebuild command:
   - `node skills/tgtool/scripts/build_skills_index.js`
+
+## Local context guard script (estimation mode)
+
+Use local estimation when runtime percentage is not directly available to the agent.
+
+Script:
+
+- `skills/tgtool/scripts/context_guard.js`
+
+Recommended call at each tgtool execution turn:
+
+```bash
+node skills/tgtool/scripts/context_guard.js \
+  --input-text "<this turn's new user+assistant text>" \
+  --context-limit 200000 \
+  --fixed-overhead 2500
+```
+
+Recommended reset after final handoff + new session:
+
+```bash
+node skills/tgtool/scripts/context_guard.js --reset
+```
+
+Interpretation:
+
+- `estimated_context_pct > 70`: warn
+- `estimated_context_pct > 85`: preview
+- `estimated_context_pct > 92`: critical
