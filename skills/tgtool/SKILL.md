@@ -288,10 +288,17 @@ For skills, resolve in this strict order:
 
 If a skill is present locally but not enabled:
 
-- auto-enable it as a temporary runtime skill for the current task
-- continue execution immediately
+- use repo utility `tools/skill_temp_toggle.py on <skill_id>` to temporarily enable it
+- continue execution immediately after a successful toggle
 - do not trigger fallback routing for this case
-- mark it for automatic disable at task closeout
+- record the skill id in the active task recap
+- at task closeout, run `tools/skill_temp_toggle.py reset` to roll back only skills that were previously disabled
+
+Temporary-toggle guardrails:
+
+- never disable skills that were already enabled before this task
+- if toggle/reset fails due permissions or environment limits, report the exact error and ask user to approve the next safe step
+- treat temporary toggles as task-scoped state, not permanent policy changes
 
 If the target skill/tool cannot be resolved immediately:
 
@@ -727,6 +734,62 @@ Use this shape:
 - whether a missing capability suggests using `find-skills` next time
 
 Keep it compact. Use it only when it helps future execution or user understanding.
+
+## Layered skill map (current repository)
+
+Use this capability map as an index-first router. Keep routing progressive and minimal.
+
+### L0: Workflow entrance and orchestration
+
+- `tgtool`: top-level router and mode/state manager
+- `using-superpowers`: delegate internal development workflow to superpowers
+- `tool-advisor`: capability confirmation when uncertainty is real
+- `find-skills`: capability-gap discovery/install path after explicit fallback approval
+
+### L1: Core engineering workflow skills
+
+- `brainstorming`
+- `writing-plans`
+- `executing-plans`
+- `subagent-driven-development`
+- `dispatching-parallel-agents`
+- `systematic-debugging`
+- `test-driven-development`
+- `verification-before-completion`
+- `requesting-code-review`
+- `receiving-code-review`
+- `finishing-a-development-branch`
+- `using-git-worktrees`
+- `planning-with-files`
+- `stream-coding`
+
+### L2: Memory, platform, and domain skills
+
+Memory and docs:
+- `claude-mem-codex`
+- `openai-docs`
+- `writing-skills`
+
+Environment/domain operations:
+- `jstorcli-yatc-jetice-ops`
+- `bucketmanager-s3control-e2e`
+- `multi-codex-orchestration`
+
+AWS domain pack:
+- `api-gateway`, `bedrock`, `cloudformation`, `cloudwatch`, `cognito`
+- `dynamodb`, `ec2`, `ecs`, `eks`, `eventbridge`
+- `iam`, `lambda`, `rds`, `s3`, `secrets-manager`, `sns`, `sqs`, `step-functions`
+
+Specialized systems:
+- `fuse`
+
+Layer progression rule:
+
+1. Start at `L0` and select one primary workflow path.
+2. Add only the needed `L1` workflow skills for the current phase.
+3. Pull `L2` domain/memory skills only when they materially improve correctness.
+4. If required skill is locally present but disabled, use temporary toggle flow, then auto-reset at closeout.
+5. Do not jump directly into broad `L2` domain routing when `L0/L1` already cover the task.
 
 ## Common routing patterns
 
