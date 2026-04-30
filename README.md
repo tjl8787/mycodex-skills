@@ -65,3 +65,8 @@ Then restart Codex so the new skills are picked up.
 
 - These are user-installed skills only.
 - System skills under `~/.codex/skills/.system` are not mirrored here.
+
+## Utilities
+
+- `tools/skill_temp_toggle.py`: temporarily enable disabled skills and roll them back with state tracking.
+  - Guide: `docs/skill-temp-toggle.md`
