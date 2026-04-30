@@ -47,7 +47,7 @@ Helper assets included in this skill:
 - `scripts/ensure_ruflo_init.py` to detect or initialize `ruflo` Codex/runtime state
 - `scripts/bootstrap_ruflo_backend.py` to automatically chain init and swarm bootstrap for `ruflo`
 - `scripts/probe_ruflo_execution.py` to shell-check that `ruflo` can create a swarm, spawn an agent, create a task, and assign it
-- `scripts/launch_explicit_tmux.py` to open visible 2-pane execution (`operator + critic`) in foreground mode
+- `scripts/launch_explicit_tmux.py` to launch visible `2 pane` orchestration (`operator + critic`) and auto-try foreground popup
 
 ## Supporting References
 
@@ -140,15 +140,18 @@ Collect per-role outputs into a stable result shape:
 
 Return the merged result back into the active `tgtool` session.
 
-### 7. Explicit visible mode policy
+### 7. Visible tmux mode (explicit execution)
 
-When the user asks for explicit/visible execution:
-- use `2 pane` by default: `operator + critic`
-- pane output must be command-only; do not print explanatory/narrative interruption text in panes
-- keep explanations in the main Codex session only
-- use:
+When the user asks for explicit execution:
+- default to `2 pane` only:
+  - `operator` pane: active execution
+  - `critic` pane: dormant by default, wake on failure/stage switch/review demand
+- do not create `verifier/reviewer` panes unless explicitly requested
+- run:
   - `python3 scripts/launch_explicit_tmux.py --session tgtool-visible --cwd <project-dir>`
-- explicit mode should auto-try foreground terminal popup; if popup is unavailable, report manual attach fallback
+- treat explicit mode as:
+  - auto-try foreground popup in a terminal emulator
+  - if popup is not possible (no GUI/display), report fallback `tmux attach -t <session>`
 
 ## Fallback Order
 

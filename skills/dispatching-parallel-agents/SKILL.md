@@ -88,6 +88,12 @@ Good agent prompts are:
 2. **Self-contained** - All context needed to understand the problem
 3. **Specific about output** - What should the agent return?
 
+### Token-efficient prompt modes
+
+- Use a delta pattern for repeated cycles: only send `last_summary` + `new_instructions`.
+- Avoid full context on every dispatch when you have role continuity.
+- In this codebase, only low-token mode is allowed; run `scripts/render_role_brief.py --delta --new-instructions "..."`.
+
 ```markdown
 Fix the 3 failing tests in src/agents/agent-tool-abort.test.ts:
 

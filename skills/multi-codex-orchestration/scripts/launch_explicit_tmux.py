@@ -24,9 +24,26 @@ def create_two_pane_session(session: str, cwd: Path) -> None:
     run(["tmux", "set", "-g", "mouse", "on"])
     run(["tmux", "set", "-g", "set-clipboard", "on"])
     run(["tmux", "setw", "-t", f"{session}:0", "synchronize-panes", "off"])
-    # Pane policy: command-only execution; no explanatory chatter in panes.
-    run(["tmux", "send-keys", "-t", f"{session}:0.0", "clear", "C-m"])
-    run(["tmux", "send-keys", "-t", f"{session}:0.1", "clear", "C-m"])
+    run(
+        [
+            "tmux",
+            "send-keys",
+            "-t",
+            f"{session}:0.0",
+            "clear; echo '[operator] active execution pane'; pwd",
+            "C-m",
+        ]
+    )
+    run(
+        [
+            "tmux",
+            "send-keys",
+            "-t",
+            f"{session}:0.1",
+            "clear; echo '[critic] dormant by default (wake on failure/stage switch/review)'; pwd",
+            "C-m",
+        ]
+    )
 
 
 def try_open_foreground(session: str) -> str:
@@ -65,7 +82,7 @@ def try_open_foreground(session: str) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Launch visible 2-pane tmux (operator + critic) for explicit orchestration."
+        description="Launch a visible 2-pane tmux multi-agent session (operator + critic)."
     )
     parser.add_argument("--session", default="tgtool-visible")
     parser.add_argument("--cwd", default=".")
